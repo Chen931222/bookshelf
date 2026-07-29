@@ -1,0 +1,767 @@
+[
+ {
+  "id": "lit-01",
+  "title": "傷心咖啡店之歌",
+  "matched": "傷心咖啡店之歌(增訂新版)",
+  "score": 68,
+  "src": "books",
+  "bytes": 11022,
+  "low": false
+ },
+ {
+  "id": "lit-02",
+  "title": "午夜圖書館",
+  "matched": "午夜圖書館",
+  "score": 100,
+  "src": "books",
+  "bytes": 108638,
+  "low": false
+ },
+ {
+  "id": "lit-03",
+  "title": "紙牌的祕密",
+  "matched": "紙牌的秘密",
+  "score": 25,
+  "src": "books",
+  "bytes": 27754,
+  "low": true
+ },
+ {
+  "id": "lit-04",
+  "title": "瑪雅",
+  "matched": "雷思瑪雅少年偵探社(1-10)",
+  "score": 41,
+  "src": "books",
+  "bytes": 64654,
+  "low": false
+ },
+ {
+  "id": "lit-05",
+  "title": "蘇菲的世界（上）",
+  "matched": "蘇菲的世界(上/下冊)",
+  "score": 69,
+  "src": "books",
+  "bytes": 25670,
+  "low": false
+ },
+ {
+  "id": "lit-06",
+  "title": "蘇菲的世界（下）",
+  "matched": "蘇菲的世界(上/下冊)",
+  "score": 69,
+  "src": "books",
+  "bytes": 25670,
+  "low": false
+ },
+ {
+  "id": "lit-07",
+  "title": "守望者",
+  "matched": "雨的守望者",
+  "score": 44,
+  "src": "books",
+  "bytes": 75198,
+  "low": false
+ },
+ {
+  "id": "lit-08",
+  "title": "梅岡城故事",
+  "matched": "梅岡城故事",
+  "score": 100,
+  "src": "books",
+  "bytes": 18462,
+  "low": false
+ },
+ {
+  "id": "lit-09",
+  "title": "變形記及其他",
+  "matched": "變形記及其他：卡夫卡中短篇小說選【逝世百年紀念.德語文學名家新譯精選】",
+  "score": 60,
+  "src": "books",
+  "bytes": 37352,
+  "low": false
+ },
+ {
+  "id": "lit-10",
+  "title": "1984",
+  "matched": "1984",
+  "score": 100,
+  "src": "books",
+  "bytes": 9254,
+  "low": false
+ },
+ {
+  "id": "lit-11",
+  "title": "動物農莊",
+  "matched": "動物農莊(精裝版)",
+  "score": 68,
+  "src": "books",
+  "bytes": 57954,
+  "low": false
+ },
+ {
+  "id": "lit-12",
+  "title": "嘿，外星人，你在聽嗎？",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-13",
+  "title": "追風箏的孩子",
+  "matched": "追風箏的孩子",
+  "score": 100,
+  "src": "books",
+  "bytes": 12304,
+  "low": false
+ },
+ {
+  "id": "lit-14",
+  "title": "魔戒首部曲：魔戒現身",
+  "matched": "魔戒首部曲：魔戒現身",
+  "score": 100,
+  "src": "books",
+  "bytes": 17270,
+  "low": false
+ },
+ {
+  "id": "lit-15",
+  "title": "魔戒二部曲：雙城奇謀",
+  "matched": "魔戒二部曲：雙城奇謀",
+  "score": 100,
+  "src": "books",
+  "bytes": 18094,
+  "low": false
+ },
+ {
+  "id": "lit-16",
+  "title": "魔戒三部曲：王者再臨",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-17",
+  "title": "魔戒前傳：哈比人歷險記",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-18",
+  "title": "三體",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-19",
+  "title": "三體II：黑暗森林",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-20",
+  "title": "三體III：死神永生",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-21",
+  "title": "飢餓遊戲",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-22",
+  "title": "星火燎原",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-23",
+  "title": "自由幻夢",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-24",
+  "title": "鳴鳥與游蛇之歌（飢餓遊戲前傳）",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-25",
+  "title": "在咖啡冷掉之前",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-26",
+  "title": "在回憶消逝之前",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-27",
+  "title": "哈利波特：死神的聖物（下）",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-28",
+  "title": "哈利波特：死神的聖物（上）",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-29",
+  "title": "地獄",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-30",
+  "title": "玻璃王座",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-31",
+  "title": "刺客教條：文藝復興",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-32",
+  "title": "刺客教條：啟示錄",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-33",
+  "title": "莎拉的鑰匙",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-34",
+  "title": "刺蝟的優雅",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-35",
+  "title": "戰爭遊戲",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-36",
+  "title": "十月的天空",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-37",
+  "title": "奇蹟男孩",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-38",
+  "title": "時光邊緣的男孩",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-39",
+  "title": "深夜電台",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-40",
+  "title": "巴別塔之犬",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-41",
+  "title": "書劍恩仇錄（一）",
+  "fail": "no-match"
+ },
+ {
+  "id": "lit-42",
+  "title": "書劍恩仇錄（二）",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-01",
+  "title": "卡內基溝通與人際關係",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-02",
+  "title": "說故事的力量",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-03",
+  "title": "商業模式全書",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-04",
+  "title": "落日餘暉：爺爺教我的人生哲學",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-05",
+  "title": "一本書讀懂經濟指標",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-06",
+  "title": "你要如何衡量你的人生？",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-07",
+  "title": "阿甘投資法",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-08",
+  "title": "深度說服力",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-09",
+  "title": "看穿內心情緒的行為暗示心理學",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-10",
+  "title": "解題背後的心理學",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-11",
+  "title": "99%的人輸在不會表達",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-12",
+  "title": "你永遠都可以有選擇",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-13",
+  "title": "可以善良，但你要有底線不當好人",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-14",
+  "title": "原子習慣",
+  "matched": "原子習慣：細微改變帶來巨大成就的實證法則",
+  "score": 65,
+  "src": "books",
+  "bytes": 36486,
+  "low": false
+ },
+ {
+  "id": "money-15",
+  "title": "打造爆紅影音",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-16",
+  "title": "絕對續訂！",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-17",
+  "title": "跟TED學表達，讓世界記住你",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-18",
+  "title": "看懂財務報表",
+  "matched": "用生活常識就能看懂財務報表【十周年暢銷紀念版】",
+  "score": 39,
+  "src": "books",
+  "bytes": 65988,
+  "low": true
+ },
+ {
+  "id": "money-19",
+  "title": "底層邏輯",
+  "matched": "底層邏輯：看清這個世界的底牌",
+  "score": 67,
+  "src": "books",
+  "bytes": 45730,
+  "low": false
+ },
+ {
+  "id": "money-20",
+  "title": "漫步華爾街的10條投資金律",
+  "matched": "漫步華爾街的10條投資金律：經理人不告訴你，但投資前一定要知道的事",
+  "score": 63,
+  "src": "books",
+  "bytes": 47732,
+  "low": false
+ },
+ {
+  "id": "money-21",
+  "title": "投資最重要的事",
+  "matched": "投資最重要的事：一本股神巴菲特讀了兩遍的書",
+  "score": 65,
+  "src": "books",
+  "bytes": 32430,
+  "low": false
+ },
+ {
+  "id": "money-22",
+  "title": "一個投機者的告白",
+  "matched": "一個投機者的告白實戰書",
+  "score": 69,
+  "src": "books",
+  "bytes": 36656,
+  "low": false
+ },
+ {
+  "id": "money-23",
+  "title": "紀律的交易者",
+  "fail": "no-match"
+ },
+ {
+  "id": "money-24",
+  "title": "為什麼你的退休金只有別人的一半",
+  "matched": "為什麼你的退休金只有別人的一半?",
+  "score": 100,
+  "src": "books",
+  "bytes": 50446,
+  "low": false
+ },
+ {
+  "id": "money-25",
+  "title": "第一次投資加密貨幣就上手",
+  "matched": "第一次投資加密貨幣就上手",
+  "score": 100,
+  "src": "books",
+  "bytes": 95944,
+  "low": false
+ },
+ {
+  "id": "money-26",
+  "title": "講好你的故事",
+  "fail": "no-match"
+ },
+ {
+  "id": "world-01",
+  "title": "我們最幸福",
+  "fail": "no-match"
+ },
+ {
+  "id": "world-02",
+  "title": "槍炮、病菌與鋼鐵",
+  "matched": "槍炮、病菌與鋼鐵：人類社會的命運",
+  "score": 67,
+  "src": "books",
+  "bytes": 16618,
+  "low": false
+ },
+ {
+  "id": "world-03",
+  "title": "不腦殘科學",
+  "matched": "不腦殘科學2：空虛寂寞覺得冷會傳染嗎?為什麼人看到可愛的東西就想捏?慢跑女孩的馬尾為什麼總是左右擺盪?生活中，處處都是泛科學!",
+  "score": 55,
+  "src": "books",
+  "bytes": 71578,
+  "low": false
+ },
+ {
+  "id": "world-04",
+  "title": "物理學的進化",
+  "fail": "no-match"
+ },
+ {
+  "id": "world-05",
+  "title": "圖解 預測未來的極簡統計學",
+  "fail": "no-match"
+ },
+ {
+  "id": "world-06",
+  "title": "時間的形狀：相對論史話",
+  "fail": "no-match"
+ },
+ {
+  "id": "world-07",
+  "title": "每天一個邏輯遊戲",
+  "fail": "no-match"
+ },
+ {
+  "id": "world-08",
+  "title": "X的奇幻旅程",
+  "matched": "班傑明的奇幻旅程",
+  "score": 24,
+  "src": "books",
+  "bytes": 14536,
+  "low": true
+ },
+ {
+  "id": "world-09",
+  "title": "數學女孩的秘密筆記：排列組合篇",
+  "fail": "no-match"
+ },
+ {
+  "id": "world-10",
+  "title": "黑暗大布局：中國的非洲經濟版圖",
+  "matched": "黑暗大布局：中國的非洲經濟版圖",
+  "score": 100,
+  "src": "books",
+  "bytes": 13978,
+  "low": false
+ },
+ {
+  "id": "world-11",
+  "title": "圖解時間簡史",
+  "matched": "圖解時間簡史",
+  "score": 100,
+  "src": "books",
+  "bytes": 17150,
+  "low": false
+ },
+ {
+  "id": "world-12",
+  "title": "國家地理 終極旅遊：一生必遊的500",
+  "matched": "國家地理終極旅遊：一生必遊的500公路之旅",
+  "score": 69,
+  "src": "books",
+  "bytes": 98740,
+  "low": false
+ },
+ {
+  "id": "world-13",
+  "title": "希特勒傳：從乞丐到元首（上）",
+  "fail": "no-match"
+ },
+ {
+  "id": "world-14",
+  "title": "希特勒傳：從乞丐到元首（下）",
+  "fail": "no-match"
+ },
+ {
+  "id": "world-15",
+  "title": "阿道夫·希特勒",
+  "matched": "忠誠是我的榮譽：阿道夫‧希特勒警衛旗隊師寫真",
+  "score": 40,
+  "src": "books",
+  "bytes": 49926,
+  "low": false
+ },
+ {
+  "id": "world-16",
+  "title": "少年臺灣史",
+  "matched": "少年臺灣史 二○一九年增訂版",
+  "score": 67,
+  "src": "books",
+  "bytes": 52546,
+  "low": false
+ },
+ {
+  "id": "world-17",
+  "title": "看得到的世界史（上）",
+  "matched": "看得到的世界史(上冊)：99樣物品的故事 你對未來會有1個答案",
+  "score": 63,
+  "src": "books",
+  "bytes": 118254,
+  "low": false
+ },
+ {
+  "id": "world-18",
+  "title": "看得到的世界史（下）",
+  "matched": "看得到的世界史(下冊)：99樣物品的故事 你對未來會有1個答案",
+  "score": 63,
+  "src": "books",
+  "bytes": 108150,
+  "low": false
+ },
+ {
+  "id": "world-19",
+  "title": "一本書讀懂歐洲史",
+  "matched": "一本書讀懂歐洲史",
+  "score": 100,
+  "src": "books",
+  "bytes": 143128,
+  "low": false
+ },
+ {
+  "id": "world-20",
+  "title": "翻開美國史",
+  "fail": "no-match"
+ },
+ {
+  "id": "lang-01",
+  "title": "Seriously... I'm Kidding",
+  "matched": "Seriously--I'm kidding",
+  "score": 80,
+  "src": "openlibrary",
+  "bytes": 47157,
+  "low": false
+ },
+ {
+  "id": "lang-02",
+  "title": "The Old Man and the Sea",
+  "matched": "The Old Man and the Sea",
+  "score": 80,
+  "src": "openlibrary",
+  "bytes": 22681,
+  "low": false
+ },
+ {
+  "id": "lang-03",
+  "title": "1984",
+  "fail": "no-match"
+ },
+ {
+  "id": "lang-04",
+  "title": "To Kill a Mockingbird",
+  "matched": "To Kill a Mockingbird",
+  "score": 80,
+  "src": "openlibrary",
+  "bytes": 72233,
+  "low": false
+ },
+ {
+  "id": "lang-05",
+  "title": "Twilight",
+  "matched": "Twilight",
+  "score": 80,
+  "src": "openlibrary",
+  "bytes": 21611,
+  "low": false
+ },
+ {
+  "id": "lang-06",
+  "title": "Boy",
+  "matched": "Boy",
+  "score": 80,
+  "src": "openlibrary",
+  "bytes": 46480,
+  "low": false
+ },
+ {
+  "id": "lang-07",
+  "title": "The Last Lecture",
+  "matched": "The Last Lecture",
+  "score": 80,
+  "src": "openlibrary",
+  "bytes": 39734,
+  "low": false
+ },
+ {
+  "id": "lang-08",
+  "title": "The Time Capsule（分級讀本）",
+  "fail": "ol-nocover"
+ },
+ {
+  "id": "lang-09",
+  "title": "Dead Men Do Tell Tales",
+  "matched": "Dead men do tell tales",
+  "score": 80,
+  "src": "openlibrary",
+  "bytes": 4763,
+  "low": false
+ },
+ {
+  "id": "lang-10",
+  "title": "Chinesisch–Deutsch 圖解字典",
+  "fail": "ol-nocover"
+ },
+ {
+  "id": "lang-11",
+  "title": "情境式西班牙語圖解字典",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-01",
+  "title": "國家地理雜誌 NO.165（2015/8）",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-02",
+  "title": "國家地理雜誌 NO.170（2016/1）",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-03",
+  "title": "國家地理雜誌 NO.171（2016/2）",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-04",
+  "title": "國家地理雜誌 NO.173（2016/4）",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-05",
+  "title": "國家地理雜誌 NO.174（2016/5）",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-06",
+  "title": "國家地理雜誌 NO.176（2016/7）",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-07",
+  "title": "國家地理雜誌 NO.178（2016/9）",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-08",
+  "title": "國家地理雜誌 NO.179（2016/10）",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-09",
+  "title": "國家地理雜誌 NO.180（2016/11）",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-10",
+  "title": "國家地理雜誌 NO.181（2016/12）",
+  "fail": "no-match"
+ },
+ {
+  "id": "mag-11",
+  "title": "職業棒球 第415期（陳金鋒珍藏）",
+  "fail": "no-match"
+ },
+ {
+  "id": "comic-01",
+  "title": "遜咖日記：失控的暑假",
+  "fail": "no-match"
+ },
+ {
+  "id": "comic-02",
+  "title": "哆啦A夢 15 大全集",
+  "fail": "no-match"
+ },
+ {
+  "id": "comic-03",
+  "title": "名偵探柯南的偵探入門",
+  "fail": "no-match"
+ },
+ {
+  "id": "comic-04",
+  "title": "Minecraft 建築大百科",
+  "fail": "ol-nocover"
+ },
+ {
+  "id": "comic-05",
+  "title": "Minecraft DIY大事典：機關地圖遊戲評鑑",
+  "fail": "ol-nocover"
+ },
+ {
+  "id": "comic-06",
+  "title": "Minecraft DIY大事典",
+  "fail": "ol-nocover"
+ },
+ {
+  "id": "comic-07",
+  "title": "Minecraft DIY大事典：自己的紅石機關自己做",
+  "fail": "no-match"
+ },
+ {
+  "id": "misc-01",
+  "title": "中興國文（第五版）",
+  "fail": "no-match"
+ },
+ {
+  "id": "misc-02",
+  "title": "朱莊嚴氏大族譜",
+  "fail": "no-match"
+ },
+ {
+  "id": "misc-03",
+  "title": "電腦組裝選購維護測試調校一本通",
+  "fail": "no-match"
+ },
+ {
+  "id": "misc-04",
+  "title": "史蒂芬·柯瑞 GOLDEN（運動傳記，分類待你決定）",
+  "fail": "no-match"
+ }
+]

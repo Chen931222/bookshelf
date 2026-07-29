@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>書櫃</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23141310'/%3E%3Crect x='8.5' y='5' width='15' height='22' rx='1.2' fill='%23F2ECE0'/%3E%3Crect x='8.5' y='5' width='3.4' height='22' fill='%23C08A4E'/%3E%3Cline x1='15' y1='9' x2='20.5' y2='9' stroke='%23141310' stroke-width='1.1'/%3E%3Cline x1='15' y1='12' x2='20.5' y2='12' stroke='%23141310' stroke-width='1.1'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#141310;
+  --paper:#F2ECE0;
+  --dim:rgba(242,236,224,.42);
+  --faint:rgba(242,236,224,.16);
+  --card-w:clamp(210px,18.6vw,358px);
+  --serif:"Noto Serif TC","Source Han Serif TC","Songti TC",serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--ink);color:var(--paper);font-family:var(--serif);
+  -webkit-font-smoothing:antialiased}
+
+.nav{position:fixed;inset:0 0 auto 0;z-index:40;display:flex;justify-content:space-between;
+  align-items:baseline;padding:clamp(20px,2.4vw,42px);mix-blend-mode:difference;pointer-events:none}
+.nav>*{pointer-events:auto}
+.nav__mark{font-size:clamp(17px,1.5vw,28px);font-weight:600;letter-spacing:.14em}
+.nav__link{font-family:var(--mono);font-size:clamp(11px,.78vw,14px);letter-spacing:.16em;
+  text-transform:uppercase;color:var(--paper);text-decoration:none;opacity:.65}
+.nav__link:hover,.nav__link:focus-visible{opacity:1}
+
+/* ---------- 首頁：橫向類別廊道 ---------- */
+.gallery{position:fixed;inset:0;display:flex;align-items:center;
+  overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
+  overscroll-behavior-x:contain;scrollbar-width:thin;
+  scrollbar-color:rgba(242,236,224,.22) transparent}
+.gallery::-webkit-scrollbar{height:3px}
+.gallery::-webkit-scrollbar-thumb{background:rgba(242,236,224,.22)}
+.gallery:focus-visible{outline:none}
+.track{display:flex;align-items:center;list-style:none;
+  gap:clamp(28px,5.52vw,106px);padding-inline:calc(50% - var(--card-w)/2)}
+.cell{flex:none;min-width:0;scroll-snap-align:center;scroll-snap-stop:always}
+.card{position:relative;display:block;text-decoration:none;color:inherit;
+  width:var(--card-w);aspect-ratio:358/505;background:var(--c);
+  filter:saturate(.6) brightness(.86);
+  transition:filter .55s cubic-bezier(.2,.7,.2,1),transform .55s cubic-bezier(.2,.7,.2,1)}
+.card:hover,.card:focus-visible{filter:none;transform:translateY(-10px)}
+.card:focus-visible{outline:1px solid var(--paper);outline-offset:10px}
+.card::before,.card::after{content:"";position:absolute;left:0;right:0;height:1px;
+  background:rgba(242,236,224,.28)}
+.card::before{top:13.5%}
+.card::after{bottom:13.5%}
+.card__name{position:absolute;top:15%;left:0;right:0;bottom:23%;
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card__name i{writing-mode:vertical-rl;text-orientation:upright;font-style:normal;
+  font-size:clamp(26px,2.9vw,52px);font-weight:600;letter-spacing:.08em;line-height:1.12;color:var(--paper)}
+.card__foot{position:absolute;left:0;right:0;bottom:4.4%;text-align:center;padding:0 8%}
+.card__count{display:block;font-family:var(--mono);font-size:clamp(10px,.63vw,12px);letter-spacing:.18em;color:var(--paper)}
+.card__rep{display:block;font-size:clamp(10.5px,.63vw,12px);line-height:1.6;color:rgba(242,236,224,.62);letter-spacing:.03em;margin-top:9px}
+.card__reading{display:block;font-family:var(--mono);font-size:clamp(9px,.5vw,10px);letter-spacing:.12em;color:rgba(242,236,224,.5);margin-top:6px}
+
+.counter{position:fixed;left:50%;bottom:clamp(24px,2.6vw,46px);transform:translateX(-50%);
+  z-index:40;display:flex;align-items:center;gap:9px;font-family:var(--mono);
+  font-size:clamp(11px,.73vw,14px);letter-spacing:.1em;mix-blend-mode:difference;pointer-events:none}
+.counter__win{height:1.35em;width:1.6em;overflow:hidden;position:relative}
+.counter__strip{position:absolute;inset:0 0 auto 0;text-align:center;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.counter__strip span{display:block;height:1.35em;line-height:1.35em}
+.counter__dash,.counter__tot{color:var(--dim)}
+.hint{position:fixed;left:clamp(20px,2.4vw,42px);bottom:clamp(24px,2.6vw,46px);z-index:40;
+  font-family:var(--mono);font-size:clamp(10px,.6vw,11px);letter-spacing:.2em;
+  text-transform:uppercase;color:var(--dim);mix-blend-mode:difference;pointer-events:none}
+.wipe{position:fixed;inset:0;width:100%;height:100%;z-index:90;pointer-events:none}
+
+/* ---------- 類別頁：3D 封面廊道 ---------- */
+.cat{position:fixed;inset:0;z-index:60;visibility:hidden;opacity:0;background:var(--ink)}
+.cat.is-on{visibility:visible;opacity:1}
+.cat__title{position:fixed;top:0;left:0;right:0;z-index:66;display:flex;justify-content:space-between;
+  align-items:baseline;padding:clamp(20px,2.4vw,42px);pointer-events:none;mix-blend-mode:difference}
+.cat__word{font-size:clamp(15px,1.4vw,26px);font-weight:600;letter-spacing:.2em;color:var(--paper)}
+.cat__word--r{font-family:var(--mono);font-size:clamp(11px,.8vw,14px);letter-spacing:.22em;
+  text-transform:uppercase;font-weight:400;color:var(--dim)}
+
+.stage{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 47%;
+  overflow:hidden;touch-action:none;cursor:grab}
+.stage:active{cursor:grabbing}
+.world{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;
+  will-change:transform}
+.obj{position:absolute;left:0;top:0;width:150px;height:216px;margin:-108px 0 0 -75px;
+  transform-style:preserve-3d;cursor:pointer;transition:opacity .18s linear}
+.cover{position:absolute;inset:0;background:var(--c);overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,.55);display:flex;flex-direction:column;
+  justify-content:space-between;padding:14px 12px;backface-visibility:hidden}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover__t{writing-mode:vertical-rl;text-orientation:upright;font-weight:600;
+  font-size:16px;line-height:1.15;letter-spacing:.06em;color:var(--paper);
+  align-self:flex-end;max-height:78%;overflow:hidden}
+.cover__a{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:rgba(242,236,224,.6);
+  writing-mode:horizontal-tb}
+.cover__dot{position:absolute;top:9px;left:9px;width:6px;height:6px;border-radius:50%;
+  background:var(--accent)}
+.obj.is-dim{pointer-events:none}
+
+.hud{position:fixed;left:50%;bottom:clamp(20px,2.6vw,40px);transform:translateX(-50%);z-index:66;
+  display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:clamp(10px,.72vw,12px);
+  letter-spacing:.14em;color:var(--dim);mix-blend-mode:difference;pointer-events:none}
+.hud b{color:var(--paper);font-weight:400}
+
+.cat__close,.cat__list-btn{position:fixed;z-index:70;border:1px solid var(--faint);
+  background:var(--ink);color:var(--paper);font-family:var(--mono);letter-spacing:.1em;
+  cursor:pointer;transition:border-color .35s}
+.cat__close{top:clamp(18px,2.2vw,38px);right:clamp(20px,2.4vw,42px);
+  width:clamp(60px,3.8vw,74px);aspect-ratio:1;border-radius:50%;font-size:clamp(10px,.66vw,12px)}
+.cat__list-btn{bottom:clamp(20px,2.6vw,40px);right:clamp(20px,2.4vw,42px);
+  padding:10px 16px;border-radius:var(--radius,8px);font-size:clamp(10px,.66vw,12px);
+  text-transform:uppercase}
+.cat__close:hover,.cat__list-btn:hover{border-color:var(--paper)}
+.cat__close[hidden],.cat__list-btn[hidden]{display:none}
+
+.home-btn{position:fixed;bottom:clamp(20px,2.6vw,40px);left:clamp(20px,2.4vw,42px);z-index:72;
+  padding:10px 18px;border:1px solid var(--faint);border-radius:8px;background:var(--ink);
+  color:var(--paper);font-family:var(--mono);font-size:clamp(10px,.66vw,12px);
+  letter-spacing:.14em;cursor:pointer;transition:border-color .35s}
+.home-btn:hover{border-color:var(--paper)}
+.home-btn[hidden]{display:none}
+
+/* 聚焦：封面旋轉 + 右側資訊 */
+.focus{position:fixed;inset:0;z-index:68;visibility:hidden;opacity:0;
+  background:rgba(10,9,8,.55);backdrop-filter:blur(18px) saturate(.7);
+  -webkit-backdrop-filter:blur(18px) saturate(.7);
+  display:grid;grid-template-columns:1fr minmax(320px,38%);
+  transition:opacity .5s}
+.focus.is-on{visibility:visible;opacity:1}
+.focus__spinwrap{display:flex;align-items:center;justify-content:center;perspective:1400px}
+.focus__spin{width:248px;height:357px;transform-style:preserve-3d;
+  animation:spin 10s linear infinite;filter:drop-shadow(0 34px 70px rgba(0,0,0,.6))}
+.bk{position:absolute;top:50%;left:50%}
+.bk-front{width:248px;height:357px;transform:translate(-50%,-50%) translateZ(11px)}
+.bk-front .cover{position:absolute;inset:0;box-shadow:none}
+.bk-back{width:248px;height:357px;transform:translate(-50%,-50%) rotateY(180deg) translateZ(11px);
+  box-shadow:inset 0 0 70px rgba(0,0,0,.45)}
+.bk-spine{width:22px;height:357px;transform:translate(-50%,-50%) rotateY(-90deg) translateZ(124px);
+  display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 30px rgba(0,0,0,.5)}
+.bk-spine span{writing-mode:vertical-rl;text-orientation:upright;font-size:11px;font-weight:500;
+  letter-spacing:.08em;color:var(--paper);opacity:.9;max-height:86%;overflow:hidden}
+.bk-pages{width:22px;height:357px;transform:translate(-50%,-50%) rotateY(90deg) translateZ(124px);
+  background:repeating-linear-gradient(90deg,#E9E1D1,#E9E1D1 1px,#d3caB8 1px,#d3caB8 2px)}
+@keyframes spin{from{transform:rotateY(-18deg)}to{transform:rotateY(342deg)}}
+.panel{align-self:center;padding:clamp(28px,4vw,64px) clamp(28px,4vw,60px) clamp(28px,4vw,64px) 0;
+  max-height:100vh;overflow-y:auto}
+.panel__kicker{font-family:var(--mono);font-size:clamp(10px,.66vw,12px);letter-spacing:.24em;
+  text-transform:uppercase;color:var(--accent)}
+.panel__t{font-size:clamp(30px,3.6vw,54px);font-weight:600;line-height:1.08;margin-top:.3em}
+.panel__a{font-size:clamp(14px,1vw,17px);color:var(--dim);margin-top:1em;letter-spacing:.04em}
+.panel__meta{margin-top:2em;border-top:1px solid var(--faint);padding-top:1.4em;
+  font-family:var(--mono);font-size:clamp(11px,.78vw,13px);line-height:2.1;color:var(--dim)}
+.panel__meta b{color:var(--paper);font-weight:400;letter-spacing:.02em}
+.panel__syn{margin-top:2em;font-size:clamp(13px,.95vw,16px);line-height:1.85;color:rgba(242,236,224,.78)}
+.focus__close{position:fixed;top:clamp(18px,2.2vw,38px);right:clamp(20px,2.4vw,42px);z-index:69;
+  width:clamp(60px,3.8vw,74px);aspect-ratio:1;border-radius:50%;border:1px solid var(--faint);
+  background:none;color:var(--paper);font-family:var(--mono);font-size:clamp(10px,.66vw,12px);
+  letter-spacing:.1em;cursor:pointer;transition:border-color .35s}
+.focus__close:hover{border-color:var(--paper)}
+
+/* 清單檢視（可及性 / reduced-motion 後備） */
+.listview{position:fixed;inset:0;z-index:64;background:var(--ink);overflow-y:auto;
+  visibility:hidden;opacity:0}
+.listview.is-on{visibility:visible;opacity:1}
+.listview__inner{max-width:min(1100px,92vw);margin:0 auto;padding:clamp(40px,7vh,110px) 0 120px}
+.lv__name{font-size:clamp(48px,9vw,120px);font-weight:600;line-height:.94;letter-spacing:.02em}
+.lv__meta{margin-top:1.4em;font-family:var(--mono);font-size:clamp(11px,.85vw,14px);color:var(--dim);line-height:1.9}
+.lv__list{list-style:none;margin-top:clamp(30px,5vh,56px)}
+.row{display:flex;align-items:baseline;gap:16px;padding:13px 0;border-bottom:1px solid var(--faint)}
+.row__i{flex:none;width:2.6em;font-family:var(--mono);font-size:clamp(10px,.7vw,12px);color:var(--dim)}
+.row__t{flex:1 1 auto;min-width:0;font-size:clamp(16px,1.3vw,21px);line-height:1.35;font-weight:500}
+.row__a{flex:none;font-family:var(--mono);font-size:clamp(10px,.72vw,12px);color:var(--dim);text-align:right;max-width:36%}
+.row.is-reading .row__t::after{content:"　正在讀";font-family:var(--mono);font-size:.62em;letter-spacing:.14em;color:var(--accent);vertical-align:.15em}
+.row.is-review{opacity:.6}
+.row.is-review .row__t::before{content:"⌇ ";color:var(--accent)}
+
+/* 留言 / 推薦 */
+.book-nav{position:fixed;top:0;right:0;z-index:41;display:flex;gap:clamp(14px,1.6vw,26px);
+  align-items:baseline;padding:clamp(20px,2.4vw,42px);pointer-events:none;mix-blend-mode:difference}
+.book-nav a{pointer-events:auto;font-family:var(--mono);font-size:clamp(11px,.78vw,14px);
+  letter-spacing:.16em;text-transform:uppercase;color:var(--paper);text-decoration:none;opacity:.65}
+.book-nav a:hover,.book-nav a:focus-visible{opacity:1}
+.guest{position:fixed;inset:0;z-index:64;background:var(--ink);overflow-y:auto;visibility:hidden;opacity:0}
+.guest.is-on{visibility:visible;opacity:1}
+.guest__inner{max-width:min(760px,90vw);margin:0 auto;padding:clamp(48px,10vh,140px) 0 120px}
+.guest__kicker{font-family:var(--mono);font-size:clamp(10px,.72vw,12px);letter-spacing:.24em;
+  text-transform:uppercase;color:var(--dim)}
+.guest__h{font-size:clamp(40px,7vw,84px);font-weight:600;line-height:1;margin-top:.2em}
+.guest__sub{margin-top:1.2em;font-size:clamp(13px,.95vw,16px);line-height:1.8;color:rgba(242,236,224,.7)}
+.guest__wait{margin-top:2.4em;padding:1.4em 1.6em;border:1px solid var(--faint);border-radius:12px;
+  font-family:var(--mono);font-size:clamp(11px,.8vw,13px);line-height:1.9;color:var(--dim)}
+#waline{margin-top:clamp(30px,5vh,56px)}
+/* Waline 深色編輯風覆寫 */
+#waline{
+  --waline-theme-color:#C08A4E;--waline-active-color:#E0A968;
+  --waline-font-size:15px;--waline-white:#F2ECE0;--waline-dark-grey:#8b857a;
+  --waline-color:#F2ECE0;--waline-bgcolor:transparent;--waline-bgcolor-light:rgba(242,236,224,.04);
+  --waline-bgcolor-hover:rgba(242,236,224,.08);--waline-border-color:rgba(242,236,224,.16);
+  --waline-disable-bgcolor:rgba(242,236,224,.06);--waline-disable-color:#6b665d;
+  --waline-bq-color:rgba(242,236,224,.2);--waline-info-bgcolor:rgba(242,236,224,.03);
+  --waline-info-color:#8b857a;--waline-border:1px solid rgba(242,236,224,.16);
+  font-family:var(--serif)}
+#waline .wl-editor,#waline .wl-input{color:var(--paper)}
+#waline .wl-btn{border-color:rgba(242,236,224,.24)}
+
+@media (max-width:767px){
+  :root{--card-w:62vw}
+  .track{gap:10vw}
+  .focus{grid-template-columns:1fr}
+  .focus__spinwrap{align-items:flex-end;padding-top:12vh}
+  .panel{align-self:start;padding:24px 22px 40px}
+  .panel__meta{border-top:none;padding-top:.6em}
+}
+@media (prefers-reduced-motion:reduce){
+  .card,.counter__strip{transition:none}
+  .focus__spin{animation:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="homeNav">
+  <span class="nav__mark">書櫃</span>
+</nav>
+<div class="book-nav" id="bookNav">
+  <a href="#留言" id="guestLink">留言</a>
+  <a href="#其他" id="miscLink">其他</a>
+</div>
+
+<div class="gallery" id="gallery" tabindex="0" role="region" aria-label="書櫃分類，可橫向捲動">
+  <ul class="track" id="track"></ul>
+</div>
+
+<div class="counter" aria-hidden="true">
+  <span class="counter__win"><span class="counter__strip" id="strip"></span></span>
+  <span class="counter__dash">—</span><span class="counter__tot" id="total"></span>
+</div>
+<p class="hint">滾動 · 點類別看書</p>
+<canvas class="wipe" id="wipe"></canvas>
+
+<!-- 類別頁：3D 廊道 -->
+<section class="cat" id="cat" aria-modal="true" role="dialog">
+  <div class="cat__title" id="catTitle"></div>
+  <div class="stage" id="stage" tabindex="0"><div class="world" id="world"></div></div>
+  <div class="hud" id="hud"></div>
+</section>
+<button class="cat__close" id="catClose" hidden>Close</button>
+<button class="cat__list-btn" id="listBtn" hidden>清單</button>
+<button class="home-btn" id="homeBtn" hidden>回主頁</button>
+
+<!-- 聚焦：旋轉封面 + 資訊 -->
+<div class="focus" id="focus">
+  <div class="focus__spinwrap"><div class="focus__spin" id="focusSpin"></div></div>
+  <div class="panel" id="panel"></div>
+</div>
+<button class="focus__close" id="focusClose" hidden>Close</button>
+
+<!-- 清單檢視 -->
+<div class="listview" id="listview"><div class="listview__inner" id="lvInner"></div></div>
+<button class="cat__close" id="lvClose" hidden style="z-index:71">Close</button>
+
+<!-- 留言 / 推薦 -->
+<section class="guest" id="guest" aria-label="留言與推薦">
+  <div class="guest__inner">
+    <p class="guest__kicker">Guestbook</p>
+    <h1 class="guest__h">留言 · 推薦一本書</h1>
+    <p class="guest__sub">看完這座書櫃，留下你的一句話，或推薦一本你覺得該進來的書。不用登入，寫個暱稱就好。</p>
+    <div id="waline"></div>
+    <div class="guest__wait" id="guestWait" hidden>留言功能設定中，很快開放。<br>（後端已部署，等資料庫接上就會亮起來。）</div>
+  </div>
+</section>
+<button class="cat__close" id="guestClose" hidden style="z-index:71">Close</button>
+
+<script>
+const CATS = [
+  {key:"lit",   name:"文學與故事", color:"#5A2A2E", rep:"蘇菲的世界　喬斯坦·賈德"},
+  {key:"money", name:"商業與溝通", color:"#2E4034", rep:"原子習慣　詹姆斯·克利爾"},
+  {key:"world", name:"看懂世界",   color:"#2A3A4A", rep:"槍炮、病菌與鋼鐵　賈德·戴蒙"},
+  {key:"lang",  name:"原文與語言", color:"#3B3550", rep:"The Old Man and the Sea　Hemingway"},
+  {key:"mag",   name:"雜誌牆",     color:"#6B5320", rep:"國家地理　National Geographic"},
+  {key:"comic", name:"漫畫・童書", color:"#2E4848", rep:"哆啦A夢　藤子·F·不二雄"},
+  {key:"misc",  name:"其他・待指認", color:"#43423E", rep:"讀不清的、教科書、族譜", hidden:true}
+];
+
+/* t=書名 a=作者 c=類別 ly=層 o=擺法 r=正在讀 rv=待核對 cover=封面檔(暫無) */
+const BOOKS = [
+  {t:"傷心咖啡店之歌",a:"朱少麟",c:"lit",ly:1,o:"spine",cover:"covers/lit-01.webp",pub:"九歌",yr:2014,syn:"深藍色燈光的傷心咖啡店，讓人暫時忘卻煩惱憂傷…… 他們在咖啡店中吶喊自由，開展傳奇，說出都會人內在自我最真實的心聲。"},
+  {t:"午夜圖書館",a:"麥特·海格",c:"lit",ly:1,o:"spine",cover:"covers/lit-02.webp",pub:"漫遊者文化",yr:2021,syn:"在生與死之間，有間圖書館， 架上的每本書，都是你當初未曾選擇的另一個人生劇本。 如果有機會讓你重新來過， 我們能不能找到自己真正想要的人生？"},
+  {t:"紙牌的祕密",a:"喬斯坦·賈德",c:"lit",ly:1,o:"spine",cover:"covers/lit-03.webp",pub:"木馬文化",yr:2011,syn:"作家賈德最鍾愛的作品！媲美《愛麗斯夢遊仙境》的當代哲學經典。漢斯和爸爸決定驅車前往哲學的故鄉希臘，尋找離家出走的媽媽——活著的感覺是如此美妙，人們卻淡忘了這種感覺。"},
+  {t:"瑪雅",a:"喬斯坦·賈德",c:"lit",ly:1,o:"spine",cover:"covers/lit-04.webp",pub:"智庫文化",yr:2000,syn:"入選聯合報讀書人每週新書金榜，全球版權銷售三十國。作者構思六年、最新完成的曠世鉅著——一場關於生命起源與存在意義的哲學追尋。"},
+  {t:"蘇菲的世界（上下冊）",a:"喬斯坦·賈德",c:"lit",ly:1,o:"spine",cover:"covers/lit-05.webp",pub:"木馬文化",yr:2017,syn:"全球暢銷5千萬冊、翻譯語言超過64種的哲學入門經典。透過一封封神祕的信，14歲的蘇菲跟著從蘇格拉底到沙特一路走過整部西方哲學史。"},
+  {t:"守望者",a:"哈波·李",c:"lit",ly:1,o:"spine",cover:"covers/lit-07.webp",pub:"時報出版",yr:2024,syn:"「關於一個驚人場所的驚人之書」，"},
+  {t:"梅岡城故事",a:"哈波·李",c:"lit",ly:1,o:"spine",cover:"covers/lit-08.webp",pub:"麥田",yr:2023,syn:"一位低調神祕的作家 一部影響無數世代的大師傑作 梅岡城故事 全球的傳奇 文學的經典 唯一授權 中文全新譯本 ◎台大外文系教授蔡秀枝專文導讀 ◎全新中譯本，新增作者生平大事記 那年，發生在梅岡城的事，已經成為一則傳奇…… 芬奇家就在梅岡城，阿提克斯．芬奇是個律師，帶著兩個小孩──哥哥傑姆和妹妹琴．露易絲。傑姆平時和妹妹一起玩，但遇到重要時刻"},
+  {t:"變形記及其他",a:"卡夫卡",c:"lit",ly:1,o:"spine",cover:"covers/lit-09.webp",pub:"堡壘文化",yr:2024,syn:"逃亡吧，最後你只會跑錯方向 ─── 逝世百年，依然厭世─── 「我最擅長的事，就是一蹶不振。」 16篇遊走於荒謬與幽默、人與非人、希望與絕望間的蟲式獨白"},
+  {t:"1984",a:"喬治·歐威爾",c:"lit",ly:1,o:"spine",cover:"covers/lit-10.webp",pub:"商務",yr:2019,syn:"戰爭即和平 自由即奴役 無知即力量"},
+  {t:"動物農莊",a:"喬治·歐威爾",c:"lit",ly:1,o:"spine",cover:"covers/lit-11.webp",pub:"商務",yr:2026,syn:"【核心賣點】 農莊上的動物與人為敵，羣起推翻人類的欺壓統治，以圖建立平等互愛、自給自足的動物王國。革命成功，豬隻拿破崙初嘗權力的美味，逐步將眾動物心目中的理想家園扭曲粉碎。他鞏固勢力、排除異己、利用動物的無知與信任，漸漸令自己變成華衣美服、酒足飯飽、兩腿走路的豬領袖。其他動物才赫然發現，奉上的汗水與性命，都是徒勞的。 【一句話推介】 《動"},
+  {t:"嘿，外星人，你在聽嗎？",a:"程遠",c:"lit",ly:1,o:"spine",cover:"covers/lit-12.webp"},
+  {t:"追風箏的孩子",a:"卡勒德·胡賽尼",c:"lit",ly:1,o:"spine",cover:"covers/lit-13.webp",pub:"木馬文化",yr:2005,syn:"故事從一對小男孩的親密友誼開始。12歲的富家少爺阿米爾與僕人哈山，從小一塊長大，年齡相仿的兩人情同兄弟，總是一起玩耍，一起分享有趣的故事。然而，在一場風箏比賽後，發生了一件悲慘不堪的事，永久破壞了兩人之間的情誼，從此各自走上不同的人生道路，可是最後卻也以兩人始料未及的方式，重新連接起彼此的關係。 即使阿米爾不久跟隨父親逃往美國，以為可以因"},
+  {t:"魔戒首部曲：魔戒現身",a:"托爾金",c:"lit",ly:1,o:"spine",cover:"covers/lit-14.webp",pub:"聯經出版公司",yr:2004,syn:"奇幻魔法小說的鼻祖、善與惡的經典戰爭 《魔戒》再現 故事，由一枚足以掌控天下的魔戒展開…… 由托爾金所寫的《魔戒》，是一部充滿矮人、精靈、騎士、巫師、半獸人、神仙等等的奇幻探險故事。五十多年來，本書澎湃壯麗的背景，奇特而豐富的人物，帶領了全世界奇幻（Fantasy）創作類型的發展及延伸。讀者所熟悉的飛龍、精靈、架空世界及國族歷史、魔法"},
+  {t:"魔戒二部曲：雙城奇謀",a:"托爾金",c:"lit",ly:1,o:"spine",cover:"covers/lit-15.webp",pub:"聯經出版公司",yr:2002,syn:"作者簡介 托爾金（J.R.R.Tolkien） 英國文學家，生於1892年1月3日，1915年牛津大學畢業，專研盎格魯撒克遜（Anglo-Saxon）歷史和語言。1925年回牛津擔任教授，時年33歲，是牛津有時以來最年輕的教授。同時，他也展開一系列神話故事的創作。最膾炙人口的有《魔戒前傳－哈比人歷險記》（The Hobbit or The"},
+  {t:"魔戒三部曲：王者再臨",a:"托爾金",c:"lit",ly:1,o:"spine",cover:"covers/lit-16.webp",pub:"聯經出版公司",yr:2002,syn:"作者簡介 托爾金（J.R.R.Tolkien） 英國文學家，生於1892年1月3日，1915年牛津大學畢業，專研盎格魯撒克遜（Anglo-Saxon）歷史和語言。1925年回牛津擔任教授，時年33歲，是牛津有時以來最年輕的教授。同時，他也展開一系列神話故事的創作。最膾炙人口的有《魔戒前傳－哈比人歷險記》（The Hobbit or The"},
+  {t:"魔戒前傳：哈比人歷險記",a:"托爾金",c:"lit",ly:1,o:"spine",cover:"covers/lit-17.webp",pub:"聯經出版公司",yr:2011,syn:"《魔戒前傳－哈比人歷險記》出版於1937年，為魔戒三部曲的前傳。 作者托爾金以融合童話與傳奇小說的手法描述，呈現出豐富的想像力、華麗而詭譎的壯麗場景。 主角比爾博被巫師甘道夫挑上，激發出他冒險的慾望，與十三個矮人組成探險隊，前往有一條惡龍守護的孤山，展開了尋寶之旅。 途中雖然經歷了各種危險，但也結識了許多不同種族的友人，比爾博更因緣際會地"},
+  {t:"三體",a:"劉慈欣",c:"lit",ly:1,o:"spine",rv:1,cover:"covers/lit-18.webp",pub:"貓頭鷹",yr:2026,syn:"NETFLIX改編作品、全宇宙暢銷書《三體》系列前傳來了！"},
+  {t:"三體II：黑暗森林",a:"劉慈欣",c:"lit",ly:1,o:"spine",cover:"covers/lit-19.webp",pub:"貓頭鷹",yr:2023,syn:"宇宙就是一座黑暗森林，每個文明都是帶槍的獵人"},
+  {t:"三體III：死神永生",a:"劉慈欣",c:"lit",ly:1,o:"spine",cover:"covers/lit-20.webp",pub:"貓頭鷹",yr:2023,syn:"二十一世紀中國文壇最值得注意的作家——劉慈欣，最暢銷系列作完結篇！"},
+  {t:"飢餓遊戲",a:"蘇珊·柯林斯",c:"lit",ly:1,o:"spine",cover:"covers/lit-21.webp",pub:"大塊文化",yr:2009,syn:"第七十四屆飢餓遊戲即將開始。飢餓遊戲是至死方休的決鬥。 「我醒來時，另半邊床是冷的。我伸手去探妹妹小櫻溫暖的身體，卻只摸到罩著床墊的粗布單。她肯定又做了惡夢，爬到媽床上去了。她當然會做惡夢，今天是抽籤的日子。」小說這樣開始。 在一個過去叫做北美洲的廢墟中，有個新建立的國家「施惠國」，分布四方的十二個行政區環繞著一個燦爛的都城。這個嚴厲又殘"},
+  {t:"星火燎原",a:"蘇珊·柯林斯",c:"lit",ly:1,o:"spine",cover:"covers/lit-22.webp",pub:"大塊文化",yr:2018,syn:"《時代雜誌》選為2009年十大小說之一，稱譽它表現出「本色的威力」。 「飢餓遊戲」系列小說首部曲《飢餓遊戲》美國版於2008年9月問世以來，暢銷年餘，始終無法退燒，迄2009年12月18日為止，已盤據紐約時報暢銷排行榜前五名66週；第二部曲《星火燎原》美國版於2009年9月出版後，與首部曲分佔紐約時報排行榜前二名已15週。 得獎記錄 《紐"},
+  {t:"自由幻夢",a:"蘇珊·柯林斯",c:"lit",ly:1,o:"spine",cover:"covers/lit-23.webp",pub:"大塊文化",yr:2018,syn:"真的還是假的，我在燃燒？ 猶如太陽，無法撲滅。 火的變種只知道一種感覺：煎熬。 飢餓遊戲成為夢魘，不能逃脫。第十三區確實存在，從被遺忘的荒野浮現。不只一次，她什麼也看不見、聽不見，沒有感覺，除了烈火焚身的痛楚，以及痛恨。但，由於她不曾參與，一無所知的計謀，凱妮絲，燃燒的女孩，活了下來。她的家鄉已經毀滅，無數第十二區的生命只剩灰燼和殘破的屍"},
+  {t:"鳴鳥與游蛇之歌（飢餓遊戲前傳）",a:"蘇珊·柯林斯",c:"lit",ly:1,o:"face",r:1,cover:"covers/lit-24.webp",pub:"大塊文化",yr:2020,syn:"鳴鳥與游蛇之歌改編電影，2023年11月磅礡上映"},
+  {t:"在咖啡冷掉之前",a:"川口俊和",c:"lit",ly:1,o:"flat",cover:"covers/lit-25.webp",pub:"悅知文化",yr:2023,syn:"暢銷台、日、美、英、義等41國、 誠品 ． 博客來 ． 金石堂年度百大、 銷售突破400萬冊之本屋賞入圍作品、 有村架純主演電影原著小說。 好萊塢即將電影化 《在咖啡冷掉之前》系列1"},
+  {t:"在回憶消逝之前",a:"川口俊和",c:"lit",ly:1,o:"face",r:1,cover:"covers/lit-26.webp",pub:"悅知文化",yr:2019,syn:"2017誠品年度暢銷總榜TOP5 2018誠品年度暢銷總榜TOP9 2017博客來年度暢銷總榜TOP29 2018博客來年度暢銷總榜TOP50 2017金石堂年度暢銷總榜TOP24 2018金石堂年度暢銷總榜TOP91 日本銷售突破120萬冊 ，本屋賞入圍作品 2018改編電影《在咖啡冷掉之前》系列之最新作品！ 「過去的悔恨、現在的徬徨、"},
+  {t:"哈利波特：死神的聖物（下）",a:"J.K.羅琳",c:"lit",ly:2,o:"spine",cover:"covers/lit-27.webp",pub:"皇冠",yr:2021,syn:"當三件聖物聯合在一起，"},
+  {t:"哈利波特：死神的聖物（上）",a:"J.K.羅琳",c:"lit",ly:2,o:"spine",rv:1,cover:"covers/lit-28.webp",pub:"皇冠",yr:2021,syn:"當三件聖物聯合在一起，"},
+  {t:"地獄",a:"丹·布朗",c:"lit",ly:2,o:"spine",cover:"covers/lit-29.webp",pub:"時報出版",yr:2023,syn:"羅柏．蘭登系列第四部。在義大利的中心，哈佛大學符號學教授羅柏．蘭登被捲入了一個令人毛骨悚然的世界，這個世界以歷史上最神祕的文學傑作之一——但丁的《地獄》——為核心。"},
+  {t:"玻璃王座",a:"莎拉·J·瑪斯",c:"lit",ly:2,o:"spine",cover:"covers/lit-30.webp",pub:"尖端",yr:2025,syn:"☆ 好讀網逾540,000名讀者滿分推薦，九成以上讀者給予超過☆☆☆☆評價！ ☆ 亞馬遜4.8星，奇幻界的夢幻逸品！"},
+  {t:"刺客教條：文藝復興",a:"奧利佛·波登",c:"lit",ly:2,o:"spine",cover:"covers/lit-31.webp"},
+  {t:"刺客教條：啟示錄",a:"奧利佛·波登",c:"lit",ly:2,o:"spine",cover:"covers/lit-32.webp"},
+  {t:"莎拉的鑰匙",a:"塔提娜·德羅斯奈",c:"lit",ly:2,o:"spine",cover:"covers/lit-33.webp"},
+  {t:"刺蝟的優雅",a:"妙莉葉·芭貝里",c:"lit",ly:2,o:"spine",cover:"covers/lit-34.webp",pub:"商周出版",yr:2008,syn:"最巴黎、最優雅的小說，魅力無可抗拒！ 就算是鐵石心腸，你也會為她激動 法國書商一致推薦的「極品小說」！ 從3000本到1,000,000本的出版奇蹟！ ★榮獲2007年法國書商獎，全球31國魅力延燒中！ ★2007年法國表現最亮眼的作品，口碑狂賣百萬冊！ ★蟬連博客來網路書店文學類排行榜第一名！ ★蟬連誠品書店排行榜第一名！ ★改編電影2"},
+  {t:"戰爭遊戲",a:"歐森·史考特·卡德",c:"lit",ly:2,o:"spine",cover:"covers/lit-35.webp",pub:"親子天下",yr:2013,syn:"這個男孩，是拯救世界的最後希望，但在這之前，他得先活著走出戰鬥學校……除非你看過這本書，別說你讀過科幻小說！二十世紀重量級經典。地球再度遭到攻擊，外星「蟲族」準備展開最後襲擊，人類能否存活，仰賴一個可以擊敗蟲族的軍事天才——安德．威金。"},
+  {t:"十月的天空",a:"侯默·希坎姆",c:"lit",ly:2,o:"spine",cover:"covers/lit-36.webp",pub:"天下文化",yr:2024,syn:"全新修訂，新增作者再版序言 ARRC 前瞻火箭研究中心創辦人吳宗信熱情推薦 《紐約時報書評》暢銷排行榜第一名 電影「十月的天空」原著 這是一本給人自由、勇氣與希望的勵志好書， 我們將發現， 有時候，單單一個夢想就足以照亮整片天空。 1957年10月，蘇聯發射了人類第一枚人造衛星旅伴號， 這枚衛星不僅震驚西方世界，開啟了太空時代的大門， 也"},
+  {t:"奇蹟男孩",a:"R.J.帕拉秋",c:"lit",ly:2,o:"spine",cover:"covers/lit-37.webp",pub:"聯合文學",yr:2011,syn:"媽媽，我願為妳多活一天。 一本發光發熱的生命紀實 「當同齡的孩子正在學習翻身，兒子卻因滿肚腹水翻不過來。當別的孩子學會坐，仰望世界好奇探索，兒子卻天天被迫吞下苦不堪言的藥粉。當別的孩子學會爬，環顧四周蠢蠢欲動，兒子則週週到醫院注射最痛的維他命K1－－只為了預防莫名出血。當其他孩子正在學步，準備展翅飛翔，我們則被推進開刀房，開始長達十小時的"},
+  {t:"時光邊緣的男人",a:"麥特·海格",c:"lit",ly:2,o:"spine",cover:"covers/lit-38.webp",pub:"寂寞",yr:2018,syn:"他的時間過得很慢很慢……慢到他不敢去愛，不敢擁抱生命。"},
+  {t:"深夜電台",a:"Nonno",c:"lit",ly:2,o:"spine",cover:"covers/lit-39.webp",pub:"皇冠",yr:2023,syn:"有一天，掏空會有盡頭， 那些失去的睡眠，都會變成你熬的夢。 《深夜電台：凌晨01:00如果你也睡不著》的初心與蛻變 6萬粉絲念念不忘 ✦初稿珍貴重現，加筆全新散文✦ 當失去熬成失眠 睡不著就只是── 那些本該消失的念念不忘 又在這個夜裡 不肯不忘"},
+  {t:"巴別塔之犬",a:"卡洛琳·帕克斯特",c:"lit",ly:2,o:"spine",cover:"covers/lit-40.webp"},
+  {t:"書劍恩仇錄（一）",a:"金庸",c:"lit",ly:4,o:"spine",cover:"covers/lit-41.webp",pub:"遠流",yr:1998},
+  {t:"書劍恩仇錄（二）",a:"金庸",c:"lit",ly:4,o:"spine",cover:"covers/lit-42.webp",pub:"遠流",yr:1998},
+
+  {t:"卡內基溝通與人際關係",a:"戴爾·卡內基",c:"lit",ly:1,o:"flat",rv:1,cover:"covers/money-01.webp",pub:"布克文化",yr:2026,syn:"連續10年《紐約時報》暢銷書排行榜 譯成58種文字，全球總銷售量超過九千萬冊！ 心靈導師戴爾．卡內基勵志經典之作 看圖秒懂，把複雜的知識變簡單！  超簡單！讓艱澀文字一目了然  超有趣！用漫畫圖解卡內基經典名作  超實用！拆解人性弱點，成為更好的人 讀者對象： *想要解決日常生活中人際關係困擾的人。 *渴望在社會上有所作為、提升個人"},
+  {t:"說故事的力量",a:"鄭立德",c:"money",ly:1,o:"flat",cover:"covers/money-02.webp",pub:"布克文化",yr:2024,syn:"「那些不改變思維的人，絕對改變不了任何事。」——邱吉爾。談判溝通超業培訓師鄭立德，從《大夢想家》《刺激1995》《最黑暗的時刻》等七部好萊塢經典電影，解析人際溝通與談判技巧。"},
+  {t:"落日餘暉：爺爺的30個人生哲學",a:"Leon E. La Couvée",c:"lit",ly:2,o:"spine",cover:"covers/money-04.webp"},
+  {t:"商業模式創新：實戰演練入門",a:"今津美樹",c:"money",ly:1,o:"flat",cover:"covers/money-27.webp",pub:"如果出版社",yr:2024,syn:"全球超過十萬人瘋狂學習、頂尖企業相繼採用。從個人創業到公司決策，一張商業模式圖表全部搞定！卷頭漫畫簡介＋實作步驟引導＋企業真實案例，三分鐘畫出屬於你自己的商業模式圖。"},
+  {t:"一本書讀懂經濟指標",a:"商業周刊",c:"money",ly:2,o:"flat",cover:"covers/money-05.webp",pub:"商業周刊",yr:2026,syn:"★ 讓投資人眼光變犀利、腦袋更清楚的經濟指標 ★ 懂經濟指標， 才能把每天波動的市場、雜亂的訊息 化為清楚的趨勢和豐碩的獲利 韓國人氣財經作家的 12 堂入門課， 教你：關鍵經濟指標 × 長期策略 × 投資心態， 養成看懂市場脈動的超前眼光"},
+  {t:"你要如何衡量你的人生？",a:"克雷頓·克里斯汀生",c:"lit",ly:2,o:"flat",cover:"covers/money-06.webp",pub:"天下文化",yr:2024,syn:"第一本將企業管理的研究成果套用在人生規劃上的書！ 特別收錄克里斯汀生訪談，剖析「人生三問」精義"},
+  {t:"阿甘投資法",a:"闕又上",c:"money",ly:2,o:"flat",cover:"covers/money-07.webp",pub:"萬化企業",yr:2026,syn:"3 大心理防線 × 4 大 人生規劃 × 5組實戰工具 系統規劃精準定位資產，用堅韌心理開創獲利上限， 讓規劃守住財富底線，讓時間創造增值空間！"},
+  {t:"深度說服力",a:"傑森·哈里斯",c:"money",ly:3,o:"spine",cover:"covers/money-08.webp",pub:"時報出版",yr:2020,syn:"遠勝話術與策略的關鍵性格"},
+  {t:"看穿內心情緒的行為暗示心理學",a:"內藤誼人",c:"lit",ly:3,o:"spine",cover:"covers/money-09.webp",pub:"方言文化",yr:2026,syn:"「表面和善友好，背後卻捅刀打小報告！」 「表裡不一」的人，你該如何預防，怎麼識破？ 全球心理學家證實！能套出真心話的絕妙時機！ 暗藏的情緒心機，你全都能瞭若指掌 獨家收錄！電郵測心術 ►有苦難言，該找何人傾訴？誰的個性不大嘴巴，亂吐缸，萬一找錯人，將被到處亂傳，甚至加油添醋！ ►對方有話不直說，盡是扯東扯西高來高往。我該單刀直入問"},
+  {t:"解題背後的心理學",a:"內藤誼人",c:"lit",ly:3,o:"spine",cover:"covers/money-10.webp"},
+  {t:"99%的人輸在不會表達",a:"李勁",c:"money",ly:3,o:"spine",cover:"covers/money-11.webp",pub:"大是文化",yr:2018,syn:"中國亞馬遜暢銷書，上榜長銷21個月"},
+  {t:"你永遠都可以有選擇",a:"",c:"money",ly:3,o:"spine",cover:"covers/money-12.webp",pub:"平安文化",yr:2022,syn:"「道德」不是迂腐的教條， 而是現代人必備的生存法則！"},
+  {t:"可以善良，但你要有底線不當好人",a:"午堂登紀雄",c:"money",ly:3,o:"spine",cover:"covers/money-13.webp",pub:"方言文化",yr:2017,syn:"38則「小惡精神」的處世待人原則， 拒絕別人，你沒有對不起誰"},
+  {t:"原子習慣",a:"詹姆斯·克利爾",c:"money",ly:3,o:"spine",cover:"covers/money-14.webp",pub:"方智",yr:2019,syn:"每天都進步1%，一年後，你會進步37倍； 每天都退步1%，一年後，你會弱化到趨近於0！ 你的一點小改變、一個好習慣，將會產生複利效應， 如滾雪球般，為你帶來豐碩的人生成果！ 一出版立刻風行全球， 企業界、運動界、教育界、瘦身界都在用的習慣養成實作指南！ ★Amazon、《紐約時報》《華爾街日報》《今日美國報》《出版人週刊》暢銷書！ ★商業"},
+  {t:"打造爆紅影音",a:"Kevin Allocca",c:"money",ly:3,o:"spine",cover:"covers/money-15.webp"},
+  {t:"絕對續訂！",a:"羅比·凱爾曼·巴克斯特",c:"money",ly:3,o:"spine",cover:"covers/money-16.webp"},
+  {t:"跟TED學表達，讓世界記住你",a:"卡曼·蓋洛",c:"money",ly:3,o:"spine",cover:"covers/money-17.webp"},
+  {t:"看懂財務報表",a:"",c:"money",ly:3,o:"spine",cover:"covers/money-18.webp",pub:"早安財經",yr:2002,syn:"你很可能從來不看上市公司的財務報表。但是，買股票不看財務報表，就像旅行不看地圖，風險當然大大提高。問題是，面對報表上一堆密密麻麻的數字，要怎麼解讀？《看懂財務報表學習地圖》是國內第一本針對完全看不懂財務報表的讀者，所製作的入門工具書。書中以step by step的方式，徹底以全面圖解，教你從完全外行，到能看懂一份上市公司財報，而且能從財"},
+  {t:"底層邏輯",a:"劉潤",c:"money",ly:3,o:"spine",cover:"covers/money-19.webp",pub:"時報出版",yr:2022,syn:"你真的相信眼睛所看到的一切嗎？"},
+  {t:"漫步華爾街的10條投資金律",a:"墨基爾",c:"money",ly:3,o:"spine",cover:"covers/money-20.webp",pub:"樂金文化",yr:2020,syn:"《時代雜誌》票選十大個人理財書籍"},
+  {t:"投資最重要的事",a:"霍華·馬克斯",c:"money",ly:3,o:"spine",cover:"covers/money-21.webp",pub:"商業周刊",yr:2017,syn:"巴菲特：這本書，我讀了兩遍！ 華爾街日報：他的備忘錄，媲美波克夏的股東大會。 價值投資者必讀經典—霍華•馬克斯20項投資法則 傳奇大師精鍊投資最重要的事， 加值4位頂尖投資專家評注筆記， 無論入門者或是老手，都能從大師洞見中找出自己的致勝方法！ 在美國投資界與巴菲特齊名的霍華．馬克斯，其所聯合創辦的橡樹資本成立時間超過二十年，管理資產規模"},
+  {t:"一個投機者的告白",a:"安德烈·科斯托蘭尼",c:"money",ly:3,o:"spine",cover:"covers/money-22.webp",pub:"商業周刊",yr:2010,syn:"一個投機者的告白，是安德烈科斯托蘭尼的投資智慧精華，除了有他對各個投資、投機市場的撥雲見日的透徹剖析，還有他一生經典的投資案例，值得想擁有財富、享受尊嚴人生的讀者，一賭為快。 重要事件 巴黎是科斯托蘭尼的發跡地，影響其一生的人生觀與金錢觀皆在此時期建立，並立志成為百萬富翁。此後他持美國護照、在德國工作，歷經兩次世界大戰，遭逢兩次徹底的破產"},
+  {t:"紀律的交易者",a:"馬克·道格拉斯",c:"money",ly:3,o:"spine",cover:"covers/money-23.webp"},
+  {t:"為什麼你的退休金只有別人的一半",a:"闕又上",c:"money",ly:3,o:"spine",cover:"covers/money-24.webp",pub:"商業周刊",yr:2019,syn:"暢銷財經作家X財務規畫師X基金經理人──闕又上 集結三十年理財投資經驗， 繼《華爾街操盤手給年輕人的15堂理財課》之後， 推出重磅鉅作！"},
+  {t:"第一次投資加密貨幣就上手",a:"Kiana Danial",c:"money",ly:3,o:"spine",cover:"covers/money-25.webp",pub:"碁峰",yr:2023,syn:"投資加密貨幣必備指南 找出表現最好的加密貨幣 了解投資加密貨幣的獲利原因 建立符合自己的加密貨幣投資策略 加密貨幣市場當然可以賺錢，然而最重要的是您必須了解自己正在投資或投機？這本專屬加密貨幣的實際投資操作指南，為您提供做出明智決定所需的一切投資理財知識。除了詳細解釋加密貨幣的工作原理外，還包含投資報酬率和風險方面的評估，並且分析探討排行"},
+  {t:"講好你的故事",a:"沈文才",c:"money",ly:0,o:"face",r:1,cover:"covers/money-26.webp",pub:"大是文化",yr:2023,syn:"★新加坡發行，銷售破萬本"},
+
+  {t:"我們最幸福",a:"芭芭拉·德米克",c:"world",ly:2,o:"spine",cover:"covers/world-01.webp",pub:"麥田",yr:2023,syn:"北韓政權的長命對許多專業北韓觀察家來說是個謎。一九九○年代，北韓即將崩潰幾乎成為無可爭議的共識。然而一反眾人預期，北韓撐過了金日成、金正日之死，直至二○一六年金正恩掌權，仍持續以核子武器與飛彈來威脅真實或想像的敵人。 據韓國國際廣播電台報導，北韓如今面臨三十年來最嚴重的糧食短缺。上個世紀九○年代中期的那場饑荒估計有六十萬到兩百萬人死亡。儘"},
+  {t:"槍炮、病菌與鋼鐵",a:"賈德·戴蒙",c:"world",ly:2,o:"spine",cover:"covers/world-02.webp",pub:"時報出版",yr:2019,syn:"歷史上到底發生了什麼事，讓世界這麼不平等？"},
+  {t:"不腦殘科學",a:"泛科學 PanSci",c:"world",ly:3,o:"spine",cover:"covers/world-03.webp",pub:"平安文化",yr:2017,syn:"粉絲突破37萬！台灣最具影響力的科普網站熱門專欄結集！"},
+  {t:"物理學的演進",a:"愛因斯坦、英費爾德",c:"world",ly:3,o:"spine",cover:"covers/world-04.webp",pub:"商周出版",yr:2021,syn:"愛因斯坦寫給所有人的科普經典。全書沒用到任何數學公式！介紹從伽利略、牛頓時代的古典理論，到場論、相對論和量子力學的物理學史。"},
+  {t:"圖解 預測未來的極簡統計學",a:"小宮山博仁",c:"world",ly:3,o:"spine",cover:"covers/world-05.webp"},
+  {t:"時間的形狀：相對論史話",a:"汪潔",c:"world",ly:3,o:"spine",cover:"covers/world-06.webp",pub:"經濟新潮社",yr:2022,syn:"史上最好懂、最精彩的相對論！完全不同於一般傳統的科普書，更像一本閒暇時可以翻閱的小說。淺顯的語言、身邊的事例、思維的實驗，這是一本人人都能讀懂的相對論。"},
+  {t:"每天一個邏輯遊戲",a:"周自然",c:"world",ly:3,o:"spine",cover:"covers/world-07.webp"},
+  {t:"X的奇幻旅程",a:"史蒂芬·斯托蓋茨",c:"world",ly:3,o:"spine",cover:"covers/world-08.webp",pub:"時報出版",yr:2021,syn:"暢銷書《達賴喇嘛的貓》作者大衛米奇，最新作品。 堪比《達文西密碼》的懸疑之作 最黑暗的時刻，最艱鉅的任務 被盜走的佛像、人人覬覦的古老典籍、神祕難解的伏藏 多傑與馬特，一九五九年與二○○七年 一名藏人，一名英國人 命運交織，橫跨時空的祕密，究竟是什麼？ 一九五九年，當中國紅軍侵入西藏，這個國家最黑暗的時刻來臨，年輕的僧侶丹僧多傑，心中升起"},
+  {t:"數學女孩的秘密筆記：排列組合篇",a:"結城浩",c:"world",ly:3,o:"spine",cover:"covers/world-09.webp",pub:"世茂",yr:2017,syn:"日本數学会出版賞。前師大數學系主任洪萬生審訂。"},
+  {t:"黑暗大布局：中國的非洲經濟版圖",a:"",c:"world",ly:3,o:"spine",rv:1,cover:"covers/world-10.webp",pub:"早安財經",yr:2009,syn:"這是一個不為人所知、但卻充滿戲劇性的故事： 非洲，這塊別人眼中的窮酸土地與黑暗國度， 早就是中國人眼中的沃土與機會。 兩位深入非洲的作者發現，中國正悄悄在非洲打造經濟版圖， 並將引來全球政治大地震… 書中內含四十張真人實事彩色照片， 本書法文版出版後引起西方世界大震撼， 英文版將同步在2009年於美國上市！ 「非洲，過去是悲觀主義受害者，"},
+  {t:"圖解時間簡史",a:"史蒂芬·霍金",c:"world",ly:3,o:"spine",cover:"covers/world-11.webp",pub:"大塊文化",yr:2012,syn:"霍金的《時間簡史》於一九八八年出版，至今被譯成四十餘種語言，銷售上千萬冊，取得科學史寫作史無前例的成功，不僅樹立里程碑，也在國際出版上造成一股風潮。《時間簡史》介紹最先端的宇宙學知識，由於微觀世界與巨觀世界的觀測技術進步神速，讓霍金教授在第一版書中的諸多理論預測獲得證實。其中包括宇宙背景探索衛星（COBE）最新的發現，深入探索宇宙開始三十"},
+  {t:"國家地理 終極旅遊：一生必遊的500",a:"",c:"world",ly:4,o:"spine",cover:"covers/world-12.webp",pub:"大石國際文化",yr:2018,syn:"啟發全球旅行者的指標性旅遊指南全新改版 網羅全世界最值得一遊的專家推薦口袋名單"},
+  {t:"希特勒傳：從乞丐到元首（上）",a:"約翰·托蘭",c:"world",ly:4,o:"spine",cover:"covers/world-13.webp"},
+  {t:"希特勒傳：從乞丐到元首（下）",a:"約翰·托蘭",c:"world",ly:4,o:"spine",cover:"covers/world-14.webp"},
+  {t:"阿道夫·希特勒",a:"Thomas Sandkühler",c:"world",ly:4,o:"spine",rv:1,cover:"covers/world-15.webp",pub:"蒼璧出版有限公司",yr:2017,syn:"「阿道夫‧希特勒警衛旗隊師」的座右銘為「忠誠是我的榮譽」，而「為元首而生，為元首而死」則是這支獨一無二部隊的具體展現。「希特勒警衛旗隊裝甲師」由1925年「親衛隊」時代創設以來歷經20年，於1939年「波蘭戰役」開始奔走於東西戰場前後6年，甚至到戰後數十年閤上雙眼魂歸故里為止，縱然過去彷如南柯一夢但未曾拋棄「忠誠是我的榮譽」信念，為德意志"},
+  {t:"少年臺灣史",a:"周婉窈",c:"world",ly:4,o:"spine",cover:"covers/world-16.webp"},
+  {t:"看得到的世界史（上）",a:"尼爾·麥葛瑞格",c:"world",ly:4,o:"spine",cover:"covers/world-17.webp"},
+  {t:"看得到的世界史（下）",a:"尼爾·麥葛瑞格",c:"world",ly:4,o:"spine",cover:"covers/world-18.webp"},
+  {t:"一本書讀懂歐洲史",a:"楊益",c:"world",ly:4,o:"spine",cover:"covers/world-19.webp"},
+  {t:"翻開美國史",a:"任德山",c:"world",ly:4,o:"spine",cover:"covers/world-20.webp"},
+
+  {t:"Seriously... I'm Kidding",a:"Ellen DeGeneres",c:"lang",ly:2,o:"spine",rv:1,cover:"covers/lang-01.webp"},
+  {t:"The Old Man and the Sea",a:"Ernest Hemingway",c:"lang",ly:2,o:"spine",cover:"covers/lang-02.webp"},
+  {t:"1984",a:"George Orwell",c:"lang",ly:2,o:"spine",cover:"covers/lang-03.webp"},
+  {t:"To Kill a Mockingbird",a:"Harper Lee",c:"lang",ly:2,o:"spine",cover:"covers/lang-04.webp"},
+  {t:"Twilight",a:"Stephenie Meyer",c:"lang",ly:2,o:"spine",cover:"covers/lang-05.webp"},
+  {t:"Boy",a:"Roald Dahl",c:"lang",ly:2,o:"spine",cover:"covers/lang-06.webp"},
+  {t:"The Last Lecture",a:"Randy Pausch",c:"lang",ly:2,o:"spine",cover:"covers/lang-07.webp"},
+  {t:"The Time Capsule（分級讀本）",a:"",c:"lang",ly:2,o:"spine",rv:1,cover:"covers/lang-08.webp"},
+  {t:"Dead Men Do Tell Tales",a:"William Maples",c:"lang",ly:3,o:"spine",cover:"covers/lang-09.webp"},
+  {t:"Chinesisch–Deutsch 圖解字典",a:"DK",c:"lang",ly:2,o:"spine",cover:"covers/lang-10.webp"},
+  {t:"情境式西班牙語圖解字典",a:"LiveABC",c:"lang",ly:2,o:"flat",cover:"covers/lang-11.webp"},
+
+  {t:"國家地理雜誌 NO.165（2015/8）",a:"",c:"mag",ly:4,o:"spine",rv:1,cover:"covers/mag-01.webp",pub:"國家地理雜誌 中文版",yr:2015,syn:"封面故事：梵蒂岡是否會因他改變？"},
+  {t:"國家地理雜誌 NO.170（2016/1）",a:"",c:"mag",ly:4,o:"spine",rv:1,cover:"covers/mag-02.webp",pub:"國家地理雜誌 中文版",yr:2016,syn:"封面故事：荒野的力量；年度主題：國家公園100年"},
+  {t:"國家地理雜誌 NO.171（2016/2）",a:"",c:"mag",ly:4,o:"spine",rv:1,cover:"covers/mag-03.webp",pub:"國家地理雜誌 中文版",yr:2016,syn:"封面故事：眼睛演化之謎——動物如何發展出複雜眼球以觀看世界？"},
+  {t:"國家地理雜誌 NO.173（2016/4）",a:"",c:"mag",ly:4,o:"spine",rv:1,cover:"covers/mag-04.webp",pub:"國家地理雜誌 中文版",yr:2016,syn:"封面故事：明治神宮：神聖森林的百年生態"},
+  {t:"國家地理雜誌 NO.174（2016/5）",a:"",c:"mag",ly:4,o:"spine",rv:1,cover:"covers/mag-05.webp",pub:"國家地理雜誌 中文版",yr:2016,syn:"封面故事：封面故事：黃石國家公園——人與荒野的新一輪談判"},
+  {t:"國家地理雜誌 NO.176（2016/7）",a:"",c:"mag",ly:4,o:"spine",rv:1,cover:"covers/mag-06.webp",pub:"國家地理雜誌 中文版",yr:2016,syn:"封面故事：影像方舟計畫——攝影師以照片拯救瀕危動物"},
+  {t:"國家地理雜誌 NO.178（2016/9）",a:"",c:"mag",ly:4,o:"spine",rv:1,cover:"covers/mag-07.webp",pub:"國家地理雜誌 中文版",yr:2016,syn:"封面故事：神祕蛇王 現身馬雅"},
+  {t:"國家地理雜誌 NO.179（2016/10）",a:"",c:"mag",ly:4,o:"spine",rv:1,cover:"covers/mag-08.webp",pub:"國家地理雜誌 中文版",yr:2016,syn:"封面故事：仿生眼：3900萬人重見光明的新希望"},
+  {t:"國家地理雜誌 NO.180（2016/11）",a:"",c:"mag",ly:4,o:"spine",rv:1,cover:"covers/mag-09.webp",pub:"國家地理雜誌 中文版",yr:2016,syn:"封面故事：全人類的新太空競賽"},
+  {t:"國家地理雜誌 NO.181（2016/12）",a:"",c:"mag",ly:4,o:"spine",rv:1,cover:"covers/mag-10.webp",pub:"國家地理雜誌 中文版",yr:2016,syn:"封面故事：信仰的科學"},
+  {t:"職業棒球 第415期（陳金鋒珍藏）",a:"",c:"mag",ly:4,o:"spine",cover:"covers/mag-11.webp",pub:"職業棒球雜誌",yr:2016,syn:"封面故事：台灣巨砲引退紀念號 完全珍藏：陳金鋒 CHIN-FENG CHEN"},
+
+  {t:"遜咖日記：失控的暑假",a:"傑夫·肯尼",c:"comic",ly:2,o:"spine",cover:"covers/comic-01.webp"},
+  {t:"哆啦A夢 15 大全集",a:"藤子·F·不二雄",c:"comic",ly:4,o:"spine",cover:"covers/comic-02.webp"},
+  {t:"名偵探柯南的偵探入門",a:"青山剛昌",c:"comic",ly:4,o:"spine",cover:"covers/comic-03.webp"},
+  {t:"Minecraft 建築大百科",a:"",c:"comic",ly:4,o:"spine",cover:"covers/comic-04.webp"},
+  {t:"Minecraft DIY大事典：機關地圖遊戲評鑑",a:"",c:"comic",ly:4,o:"spine",cover:"covers/comic-05.webp",pub:"尖端",yr:2014,syn:"最好玩的Minecraft機關地圖不用再費心去找了！本書嚴選45款涵蓋跑酷、冒險、密室、SkyBlock、解謎、要塞六大類的機關地圖遊戲，讓你充分享受Minecraft多樣化的遊戲世界。"},
+  {t:"Minecraft DIY大事典：RPG伺服完全解密",a:"MTW",c:"comic",ly:4,o:"spine",cover:"covers/comic-06.webp"},
+  {t:"Minecraft DIY大事典：自己的紅石機關自己做",a:"",c:"comic",ly:4,o:"spine",cover:"covers/comic-07.webp",pub:"尖端",yr:2020,syn:"隨書附贈機關教學影片（書內附連結），看書對照影片讓學習更簡單！"},
+
+  {t:"中興國文（第五版）",a:"中興大學中文系",c:"misc",ly:4,o:"spine",cover:"covers/misc-01.webp"},
+  {t:"朱莊嚴氏大族譜",a:"宗親會編印",c:"misc",ly:4,o:"spine"},
+  {t:"電腦組裝選購維護測試調校一本通",a:"李慶宗",c:"misc",ly:3,o:"spine"},
+  {t:"史蒂芬·柯瑞 GOLDEN（運動傳記，分類待你決定）",a:"Marcus Thompson II",c:"misc",ly:3,o:"spine",rv:1,pub:"木馬文化",yr:2018,syn:"柯瑞證明了：即使先天條件不被看好，也能創造超群的成就。"},
+  {t:"待指認：藍色平放書「…美翔…」",a:"",c:"misc",ly:1,o:"flat",rv:1},
+  {t:"待指認：書背「半」字起首",a:"",c:"misc",ly:1,o:"spine",rv:1},
+  {t:"待指認：第2層深色被遮書",a:"",c:"misc",ly:2,o:"spine",rv:1},
+  {t:"我的奮鬥（希特勒自傳）",a:"阿道夫·希特勒",c:"world",ly:2,o:"spine",cover:"covers/world-21.webp",pub:"大明王氏出版",syn:"希特勒的自傳，附錄希特勒遺囑。舊版藏書。"},
+  {t:"待指認：紅底「Think」162",a:"",c:"misc",ly:3,o:"spine",rv:1},
+  {t:"待指認：白底「訂〓」書",a:"",c:"misc",ly:3,o:"spine",rv:1},
+  {t:"待指認：第3層白色平放書",a:"",c:"misc",ly:3,o:"flat",rv:1},
+  {t:"待指認：第3層暗色薄書",a:"",c:"misc",ly:3,o:"spine",rv:1},
+  {t:"美國職棒 2016年12月號（No.103）",a:"",c:"mag",ly:4,o:"spine",cover:"covers/mag-12.webp",pub:"美國職棒雜誌",yr:2016,syn:"封面故事：美夢成真 CUBS WIN！"},
+  {t:"5000個考倒老師的酷知識",a:"國家地理",c:"comic",ly:4,o:"flat",cover:"covers/comic-08.webp"}
+];
+
+const byCat = k => BOOKS.filter(b => b.c === k);
+const $ = id => document.getElementById(id);
+const rm   = matchMedia("(prefers-reduced-motion: reduce)");
+const fine = matchMedia("(hover: hover) and (pointer: fine)");
+const esc = s => String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const tint = hex => { const n=parseInt(hex.slice(1),16); let r=(n>>16)&255,g=(n>>8)&255,b=n&255,f=.55;
+  r=Math.round(r+(255-r)*f);g=Math.round(g+(255-g)*f);b=Math.round(b+(255-b)*f);return `rgb(${r},${g},${b})`; };
+const shade = (hex,f) => { const n=parseInt(hex.slice(1),16);
+  return `rgb(${Math.round((n>>16&255)*f)},${Math.round((n>>8&255)*f)},${Math.round((n&255)*f)})`; };
+const clean = t => String(t).replace(/（.*?）/g,'');
+const lyLabel = ly => ly===0 ? "手邊（正在讀）" : ["","第一層","第二層","第三層","第四層"][ly] || "—";
+const oriLabel = o => ({spine:"書背朝外",face:"封面朝外",flat:"平放"})[o] || o;
+
+/* ---------- 首頁 ---------- */
+const gallery=$("gallery"), track=$("track"), strip=$("strip"), wipe=$("wipe");
+const HOMECATS = CATS.filter(c=>!c.hidden);
+HOMECATS.forEach((c,i)=>{
+  const books=byCat(c.key), reading=books.filter(b=>b.r).length;
+  const li=document.createElement("li"); li.className="cell";
+  li.innerHTML='<a class="card" href="#'+c.key+'" style="--c:'+c.color+'" data-key="'+c.key+'">'
+    +'<span class="card__name"><i>'+c.name+'</i></span><span class="card__foot">'
+    +'<span class="card__count">'+books.length+' 冊</span>'
+    +'<span class="card__rep">'+c.rep+'</span>'
+    +(reading?'<span class="card__reading">正在讀 '+reading+'</span>':'')+'</span></a>';
+  track.appendChild(li);
+  strip.insertAdjacentHTML("beforeend","<span>"+(i+1)+"</span>");
+});
+$("total").textContent=HOMECATS.length;
+
+let gtarget=0, graf=null;
+function onGWheel(e){
+  if(e.ctrlKey) return; if(Math.abs(e.deltaX)>Math.abs(e.deltaY)) return;
+  const max=gallery.scrollWidth-gallery.clientWidth;
+  const px=e.deltaMode===1?e.deltaY*40:e.deltaMode===2?e.deltaY*gallery.clientHeight:e.deltaY;
+  const at=gallery.scrollLeft;
+  if((px>0&&at>=max-1)||(px<0&&at<=1)) return;
+  e.preventDefault(); gtarget=Math.max(0,Math.min(max,gtarget+px));
+  if(rm.matches){gallery.scrollLeft=gtarget;return;}
+  gallery.style.scrollSnapType="none"; if(!graf) graf=requestAnimationFrame(gtick);
+}
+function gtick(){
+  const cur=gallery.scrollLeft, next=cur+(gtarget-cur)*.12; gallery.scrollLeft=next;
+  if(Math.abs(gtarget-next)>.5){graf=requestAnimationFrame(gtick);}
+  else{graf=null; gallery.style.scrollSnapType="x mandatory";}
+}
+gallery.addEventListener("scroll",()=>{
+  if(!graf) gtarget=gallery.scrollLeft;
+  const max=gallery.scrollWidth-gallery.clientWidth;
+  const i=max?Math.round(gallery.scrollLeft/max*(HOMECATS.length-1)):0;
+  strip.style.transform="translateY(-"+(i*1.35)+"em)";
+},{passive:true});
+if(fine.matches) gallery.addEventListener("wheel",onGWheel,{passive:false});
+
+/* ---------- 波浪擦除 ---------- */
+const ctx=wipe.getContext("2d");
+function sizeCanvas(){const d=Math.min(devicePixelRatio||1,2);wipe.width=innerWidth*d;wipe.height=innerHeight*d;}
+function wave(color,p){
+  const W=wipe.width,H=wipe.height,seg=Math.ceil(W/40),t=(1-p)*H,amp=300*Math.sin(p*Math.PI)*(W/1920);
+  ctx.clearRect(0,0,W,H);ctx.beginPath();ctx.moveTo(W,H);ctx.lineTo(0,H);ctx.lineTo(0,t);
+  for(let n=0;n<=seg;n++){const x=40*n;ctx.lineTo(x,t-Math.sin(x/W*Math.PI)*amp);}
+  ctx.lineTo(W,t);ctx.closePath();ctx.fillStyle=color;ctx.fill();
+}
+function sweep(color,from,to,ms){
+  return new Promise(resolve=>{
+    let settled=false; const done=()=>{if(settled)return;settled=true;wave(color,to);resolve();};
+    if(rm.matches){done();return;}
+    const t0=performance.now(), guard=setTimeout(done,ms+400);
+    (function step(now){
+      if(settled)return; const p=Math.min(1,(now-t0)/ms);
+      const e=p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2; wave(color,from+(to-from)*e);
+      if(p<1){requestAnimationFrame(step);} else{clearTimeout(guard);done();}
+    })(t0);
+  });
+}
+function clearWipe(){ctx.clearRect(0,0,wipe.width,wipe.height);}
+
+/* ---------- 3D 廊道 ---------- */
+const cat=$("cat"), stage=$("stage"), world=$("world"), hud=$("hud");
+const STEP=330, RX=520, RY=340, P=1100, NEAR=P*0.82, FAR=-2600, FADE=900;
+let objs=[], camZ=0, camTarget=0, sraf=null, openKey=null, lastFocus=null;
+
+function seed(i){const a=Math.sin((i+1)*12.9898)*43758.5453, b=Math.sin((i+1)*78.233)*43758.5453;
+  return {x:(a-Math.floor(a))-.5, y:(b-Math.floor(b))-.5};}
+
+function coverInner(b,accent){
+  return b.cover
+    ? '<img src="'+esc(b.cover)+'" alt="">'
+    : '<span class="cover__dot" style="--accent:'+accent+'"></span>'
+      +'<span class="cover__t">'+esc(clean(b.t))+'</span>'
+      +'<span class="cover__a">'+esc(b.a||'')+'</span>';
+}
+function coverHTML(b,accent){
+  return '<div class="cover" style="--c:'+(b._c||'#333')+'">'+coverInner(b,accent)+'</div>';
+}
+/* 聚焦用的有厚度 3D 書：封面 / 封底 / 書背 / 書口紙緣 */
+function book3dHTML(b,accent){
+  const dark=shade(b._c||'#333',.58);
+  return '<div class="bk bk-front"><div class="cover" style="--c:'+(b._c||'#333')+'">'+coverInner(b,accent)+'</div></div>'
+    +'<div class="bk bk-back" style="background:'+dark+'"></div>'
+    +'<div class="bk bk-spine" style="background:'+dark+'"><span>'+esc(clean(b.t))+'</span></div>'
+    +'<div class="bk bk-pages"></div>';
+}
+
+function buildStage(c){
+  const books=byCat(c.key), accent=tint(c.color);
+  cat.style.setProperty("--accent",accent);
+  $("catTitle").innerHTML='<span class="cat__word">'+esc(c.name)+'</span>'
+    +'<span class="cat__word--r">'+books.length+' 冊 · '+c.key+'</span>';
+  world.innerHTML="";
+  objs=books.map((b,i)=>{
+    b._c=c.color;
+    const s=seed(i), x=Math.round(s.x*RX), y=Math.round(s.y*RY), z=-i*STEP;
+    const el=document.createElement("div");
+    el.className="obj"; el.dataset.i=i;
+    el.style.transform="translate3d("+x+"px,"+y+"px,"+z+"px)";
+    el.style.filter="brightness("+(0.82+((Math.sin((i+1)*3.7)+1)/2)*0.32).toFixed(2)+")";
+    el.innerHTML=coverHTML(b,accent);
+    world.appendChild(el);
+    return {el,x,y,z,b};
+  });
+  camTarget=camZ=STEP; // 從第一本略前方起步
+  updateStage(true);
+  const total=(books.length-1)*STEP;
+  hud.innerHTML='<span>滾動穿過書櫃</span> · <b id="hudN">01</b> / '+String(books.length).padStart(2,"0");
+  stage._total=total; stage._n=books.length;
+}
+
+function updateStage(instant){
+  world.style.transform="translateZ("+camZ+"px)";
+  let front=0, frontD=1e9;
+  for(const o of objs){
+    const eff=o.z+camZ;                 // 螢幕 z：越接近 P 越貼臉
+    let op=1;
+    if(eff>NEAR) op=0;                  // 穿過視點，隱藏
+    else if(eff<FAR) op=0;              // 太遠
+    else if(eff<FAR+FADE) op=(eff-FAR)/FADE;
+    else if(eff>NEAR-260) op=Math.max(0,(NEAR-eff)/260);
+    o.el.style.opacity=op;
+    o.el.style.visibility = op<=0.02 ? "hidden":"visible";
+    o.el.classList.toggle("is-dim", op<=0.02);
+    const d=Math.abs(eff-(P*0.35));
+    if(op>0.2 && d<frontD){frontD=d; front=+o.el.dataset.i;}
+  }
+  const hn=$("hudN"); if(hn) hn.textContent=String(front+1).padStart(2,"0");
+}
+
+function stick(){
+  camZ += (camTarget-camZ)*0.09;
+  updateStage();
+  if(Math.abs(camTarget-camZ)>0.4){sraf=requestAnimationFrame(stick);}
+  else{camZ=camTarget; updateStage(); sraf=null;}
+}
+function dolly(dz){
+  const max=stage._total||0;
+  camTarget=Math.max(STEP, Math.min(max+STEP, camTarget+dz));
+  if(rm.matches){camZ=camTarget; updateStage(); return;}
+  if(!sraf) sraf=requestAnimationFrame(stick);
+}
+stage.addEventListener("wheel",e=>{
+  e.preventDefault();
+  const px=e.deltaMode===1?e.deltaY*40:e.deltaMode===2?e.deltaY*innerHeight:e.deltaY;
+  dolly(px*1.1);
+},{passive:false});
+let drag=null;
+stage.addEventListener("pointerdown",e=>{drag={y:e.clientY,base:camTarget,moved:0};stage.setPointerCapture(e.pointerId);});
+stage.addEventListener("pointermove",e=>{if(!drag)return; const d=e.clientY-drag.y; drag.moved=Math.abs(d);
+  camTarget=Math.max(STEP,Math.min((stage._total||0)+STEP,drag.base - d*2.4)); if(!sraf)sraf=requestAnimationFrame(stick);});
+stage.addEventListener("pointerup",e=>{drag=null;});
+stage.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight"||e.key==="ArrowDown"){e.preventDefault();dolly(STEP);}
+  if(e.key==="ArrowLeft"||e.key==="ArrowUp"){e.preventDefault();dolly(-STEP);}
+});
+stage.addEventListener("click",e=>{
+  const el=e.target.closest(".obj"); if(!el) return;
+  if(drag && drag.moved>6) return;
+  openFocus(+el.dataset.i);
+});
+
+/* ---------- 聚焦：旋轉 + 資訊 ---------- */
+const focus=$("focus"), focusSpin=$("focusSpin"), panel=$("panel");
+function openFocus(i){
+  const o=objs[i]; if(!o) return; const b=o.b;
+  const accent=tint(CATS.find(c=>c.key===b.c).color);
+  focusSpin.innerHTML=book3dHTML(b,accent);
+  panel.innerHTML=
+    '<p class="panel__kicker">'+esc(CATS.find(c=>c.key===b.c).name)+'</p>'
+    +'<h2 class="panel__t">'+esc(b.t.replace(/（.*?）/g,''))+'</h2>'
+    +'<p class="panel__a">'+esc(b.a||'作者待補')+'</p>'
+    +'<div class="panel__meta">'
+    +(b.pub?'出版　<b>'+esc(b.pub)+(b.yr?'　'+b.yr:'')+'</b><br>':'')
+    +'在書櫃　<b>'+lyLabel(b.ly)+'</b><br>'
+    +'擺法　<b>'+oriLabel(b.o)+'</b>'+(b.r?'　·　<b style="color:'+accent+'">正在讀</b>':'')
+    +(b.rv?'<br><b style="color:'+accent+'">書名待你核對</b>':'')+'</div>'
+    +(b.syn
+      ?'<p class="panel__syn">'+esc(b.syn)+'</p><p class="panel__syn" style="font-size:.72em;color:var(--dim)">簡介來源：博客來</p>'
+      :'<p class="panel__syn" style="color:var(--dim)">這本的簡介還在補抓中。</p>');
+  focus.classList.add("is-on"); $("focusClose").hidden=false;
+  $("focusClose").focus();
+}
+function closeFocus(){focus.classList.remove("is-on"); $("focusClose").hidden=true; stage.focus();}
+$("focusClose").addEventListener("click",closeFocus);
+
+/* ---------- 清單檢視 ---------- */
+const listview=$("listview");
+function buildList(c){
+  const books=byCat(c.key), reading=books.filter(b=>b.r), shelf=books.filter(b=>!b.r);
+  const authors=new Set(books.map(b=>b.a).filter(Boolean)), review=books.filter(b=>b.rv).length;
+  const row=(b,idx)=>'<li class="row'+(b.r?' is-reading':'')+(b.rv?' is-review':'')+'">'
+    +'<span class="row__i">'+String(idx).padStart(2,"0")+'</span>'
+    +'<span class="row__t">'+esc(b.t)+'</span><span class="row__a">'+esc(b.a||'—')+'</span></li>';
+  let h='<p class="panel__kicker" style="--accent:'+tint(c.color)+';color:'+tint(c.color)+'">'+esc(c.name)+'</p>'
+    +'<h1 class="lv__name">'+esc(c.name)+'</h1>'
+    +'<div class="lv__meta"><b style="color:var(--paper)">'+books.length+'</b> 冊 · <b style="color:var(--paper)">'+authors.size+'</b> 位作者'
+    +(reading.length?' · <b style="color:var(--paper)">'+reading.length+'</b> 本正在讀':'')
+    +(review?'<br>'+review+' 本待你核對（⌇）':'')+'</div>';
+  if(reading.length) h+='<ul class="lv__list">'+reading.map((b,i)=>row(b,i+1)).join('')+'</ul>';
+  h+='<ul class="lv__list">'+shelf.map((b,i)=>row(b,i+1)).join('')+'</ul>';
+  $("lvInner").innerHTML=h;
+}
+function openList(){buildList(CATS.find(c=>c.key===openKey)); listview.classList.add("is-on"); $("lvClose").hidden=false;}
+function closeList(){listview.classList.remove("is-on"); $("lvClose").hidden=true; stage.focus();}
+$("listBtn").addEventListener("click",openList);
+$("lvClose").addEventListener("click",closeList);
+
+/* ---------- 開關類別 ---------- */
+async function open(key){
+  const c=CATS.find(x=>x.key===key); if(!c) return; openKey=key; lastFocus=document.activeElement;
+  await sweep(c.color,0,1,1100);
+  buildStage(c);
+  cat.classList.add("is-on"); $("catClose").hidden=false; $("listBtn").hidden=false; $("homeBtn").hidden=false;
+  stage.focus();
+  await sweep(c.color,1,0,1100); clearWipe();
+}
+async function close(){
+  const c=CATS.find(x=>x.key===openKey)||CATS[0];
+  if(focus.classList.contains("is-on")) closeFocus();
+  if(listview.classList.contains("is-on")) closeList();
+  await sweep(c.color,0,1,1100);
+  cat.classList.remove("is-on"); $("catClose").hidden=true; $("listBtn").hidden=true; $("homeBtn").hidden=true;
+  if(sraf){cancelAnimationFrame(sraf);sraf=null;} openKey=null;
+  if(lastFocus) lastFocus.focus();
+  await sweep(c.color,1,0,1100); clearWipe();
+}
+track.addEventListener("click",e=>{const card=e.target.closest(".card"); if(!card)return; e.preventDefault(); open(card.dataset.key);});
+$("miscLink").addEventListener("click",e=>{e.preventDefault();open("misc");});
+$("catClose").addEventListener("click",close);
+$("homeBtn").addEventListener("click",close);
+addEventListener("keydown",e=>{
+  if(e.key!=="Escape") return;
+  if(focus.classList.contains("is-on")) closeFocus();
+  else if(listview.classList.contains("is-on")) closeList();
+  else if(guest.classList.contains("is-on")) closeGuest();
+  else if(openKey) close();
+});
+
+/* ---------- 留言 / 推薦（Waline） ---------- */
+const GUEST_SERVER="https://bookshelf-comments.vercel.app";
+const guest=$("guest");
+let walineLoaded=false;
+async function initWaline(){
+  if(walineLoaded) return;
+  // 健康檢查：後端 + 資料庫都就緒才掛載，否則顯示「設定中」
+  let ok=false;
+  try{
+    const r=await fetch(GUEST_SERVER+"/api/comment?path=%2F&type=count",{headers:{Accept:"application/json"}});
+    ok = r.ok && (r.headers.get("content-type")||"").includes("json");
+  }catch(e){ ok=false; }
+  if(!ok){ $("guestWait").hidden=false; $("waline").style.display="none"; return; }
+  $("guestWait").hidden=true; $("waline").style.display="";
+  const mod=await import("https://unpkg.com/@waline/client@v3/dist/waline.js");
+  const css=document.createElement("link"); css.rel="stylesheet";
+  css.href="https://unpkg.com/@waline/client@v3/dist/waline.css"; document.head.appendChild(css);
+  mod.init({ el:"#waline", serverURL:GUEST_SERVER, path:"/", lang:"zh-TW",
+    login:"disable", reaction:false, emoji:false, dark:true,
+    locale:{ placeholder:"寫下你的留言或推薦…（暱稱必填，Email 可留可不留）" } });
+  walineLoaded=true;
+}
+function openGuest(){ guest.classList.add("is-on"); $("guestClose").hidden=false; initWaline(); }
+function closeGuest(){ guest.classList.remove("is-on"); $("guestClose").hidden=true; }
+$("guestLink").addEventListener("click",e=>{e.preventDefault();openGuest();});
+$("guestClose").addEventListener("click",closeGuest);
+
+addEventListener("resize",sizeCanvas); sizeCanvas();
+</script>
+</body>
+</html>
