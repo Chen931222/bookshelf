@@ -5,5 +5,18 @@
 
 線上版：https://bookshelf-nine-gamma.vercel.app
 
-單檔 `index.html`。`catalogue-draft.md` 是編目草稿。
-原始照片（`raw/`）不進版本庫。
+![書櫃分類](docs/shelf.png)
+
+六個分類橫向排開，每張卡標著冊數與正在讀的書。滾動切換、點類別進去看書。
+
+![書籍詳情](docs/detail.png)
+
+點一本書會攤開它的檔案：出版資訊、在書櫃的哪一層、怎麼擺（平放／立放），
+以及大綱、書裡的觀點、各界評價與我自己的評語。
+
+## 結構
+
+單檔 `index.html`——版面、資料與互動都在裡面。
+`catalogue-draft.md` 是編目草稿，標了封面朝外的書（＝正在讀）。
+
+`covers/` 是自己拍的書封（webp）；原始照片（`raw/`）約 300MB，不進版本庫。
