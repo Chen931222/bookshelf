@@ -5,6 +5,11 @@
 
 線上版：https://bookshelf-nine-gamma.vercel.app
 
+![操作示範](docs/demo.gif)
+
+從書櫃滾到類別、推開封面廊道、翻開一本書。
+（[高畫質 MP4](docs/demo.mp4)）
+
 ![書櫃分類](docs/shelf.png)
 
 六個分類橫向排開，每張卡標著冊數與正在讀的書。滾動切換、點類別進去看書。
