@@ -4,3 +4,7 @@ raw/
 .DS_Store
 node_modules/
 .env*
+
+# 工具寫檔時的暫存與備份（books.json 本身要進版控）
+*.bak
+*.tmp

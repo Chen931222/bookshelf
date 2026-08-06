@@ -1,0 +1,9 @@
+{
+  "name": "bookshelf",
+  "version": "1.0.0",
+  "private": true,
+  "description": "個人實體書櫃網站。前端是純靜態 index.html + books.json；api/ 是問書櫃的 serverless function。",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0"
+  }
+}

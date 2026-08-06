@@ -11,12 +11,15 @@ raw/
 
 # 一次性的離線腳本與中繼資料（跑完就丟，不是 runtime 依賴）
 scripts/
+tools/
+*.tmp
 ncl-csv/
 *.csv
 *.draft.json
 
 # 內部工作草稿，不需公開
 catalogue-draft.md
+*.bak
 
 # 雜項
 node_modules/
