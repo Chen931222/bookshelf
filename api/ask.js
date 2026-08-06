@@ -103,8 +103,12 @@ module.exports = async (req, res) => {
       messages: [{ role: 'user', content: question }]
     });
 
-    for await (const chunk of stream.textStream) {
-      res.write(chunk);
+    // 注意：JS SDK 沒有 Python 那個 stream.text_stream / textStream。
+    // 這裡要自己從事件流裡挑出文字增量。
+    for await (const event of stream) {
+      if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+        res.write(event.delta.text);
+      }
     }
 
     const final = await stream.finalMessage();
