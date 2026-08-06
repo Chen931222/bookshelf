@@ -8,3 +8,6 @@ node_modules/
 # 工具寫檔時的暫存與備份（books.json 本身要進版控）
 *.bak
 *.tmp
+
+# 私人筆記逃生口：太私密、不想進公開版控的感想寫這裡
+private/

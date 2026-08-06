@@ -231,7 +231,8 @@ function next(){
     '</div></div>'+
     '<label>讀後心得</label>'+
     '<textarea id="nNote" rows="4" placeholder="三句話就好。它讓你想到什麼？改變了什麼？"></textarea>'+
-    '<p class="hint">寫給未來的自己看，不用寫得像書評。</p>'+
+    '<p class="hint">會顯示在公開網站上，而且進了 git 歷史就撤不回來 —— '+
+      '用「印在名片背面也無所謂」的標準寫。真正私人的感想寫進 private/（不進版控）。</p>'+
     '<label>劃線句子</label>'+
     '<textarea id="nQ" rows="3" placeholder="一行一句，直接打或抄書上劃線的"></textarea>'+
     '<label>概念標籤</label>'+
