@@ -109,13 +109,18 @@ http.createServer(async (req, res) => {
 請讀完後產出筆記初稿，回傳純 JSON（不要包在程式碼區塊裡）：
 {
   "summary": "這幾頁在講什麼的重點整理，3-5 句繁體中文",
-  "quotes": ["直接抄自照片的句子", "..."],
+  "quotes": [{"text": "直接抄自照片的句子", "page": 3}],
   "tags": ["概念標籤", "..."],
   "angles": "兩三個可以下筆的角度，讓主人知道從哪裡開始寫自己的感想"
 }
 
 規則：
-- quotes 必須是照片上**真的看得到的句子**，一字不改地抄下來。看不清楚就不要收。**絕對不可以自己造句或改寫**——這是要放到公開網站上的引文。
+- quotes 必須是照片上**真的看得到的句子**，一字不改地抄下來。**絕對不可以自己造句或改寫**——這是要放到公開網站上的引文。
+- \`page\` 是這句話出自第幾張照片（從 1 開始算），主人要拿它回頭核對。
+- **最重要的一條**：遇到看不清、被劃線蓋住、或印刷模糊的字，**不要把它「補」成一個讀起來通順的字**。
+  那是最危險的錯誤——整句讀起來毫無破綻，但其中一兩個詞已經被你改掉了，主人核對時抓不到。
+  不確定的字一律用〓代替（例如「他說我們必須〓〓這件事」），寧可留洞也不要猜。整句都看不清就整句不要收。
+- 注意異體字要照抄，不要正規化：裡／裏、為／爲、台／臺、著／着 —— 書上印什麼就抄什麼。
 - 照片可能是直排、可能歪斜、可能有手寫劃線。劃線或折角處通常就是主人在意的地方，優先收。
 - tags 用概念層級的詞（例如「決策」「自由」「複利」），不要用書名或人名。
 - summary 是客觀整理，不要寫成第一人稱感想——感想要主人自己寫。
@@ -240,6 +245,14 @@ video{width:100%;max-width:420px;border:1px solid var(--faint);border-radius:2px
 .scan label.go{display:inline-block}
 .angles{margin-top:10px;font-size:13px;line-height:1.85;color:rgba(242,236,224,.62);
  border-left:2px solid var(--faint);padding-left:12px}
+.chk{margin-top:16px;border-top:1px solid var(--faint);padding-top:14px}
+.chk__h{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--gold);margin-bottom:10px}
+.chk__i{padding:9px 10px;margin-bottom:6px;border:1px solid transparent;border-radius:2px;cursor:pointer}
+.chk__i:hover{border-color:var(--faint);background:rgba(242,236,224,.03)}
+.chk__q{font-size:14px;line-height:1.8;font-style:italic;color:rgba(242,236,224,.85)}
+.chk__q.warn{color:var(--gold)}
+.chk__p{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--dim);margin-top:5px}
+.chk__img{width:100%;margin-top:10px;border:1px solid var(--faint);border-radius:2px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:620px){.grid{grid-template-columns:1fr}.book{flex-direction:column}}
 </style></head><body><div class="wrap">
@@ -311,6 +324,7 @@ function next(){
       '</div>'+
       '<p class="msg" id="scanMsg"></p>'+
       '<p class="angles" id="angles" hidden></p>'+
+      '<div class="chk" id="check" hidden></div>'+
     '</div>'+
     '<label>讀後心得</label>'+
     '<textarea id="nNote" rows="4" placeholder="三句話就好。它讓你想到什麼？改變了什麼？"></textarea>'+
@@ -349,6 +363,33 @@ function shrink(file){
     img.src=url;
   });
 }
+/* 引文對照：把每一句和它宣稱的來源照片擺在一起。
+   視覺模型讀直排中文最陰險的錯法不是亂碼，是把讀不清的字補成通順但錯的字 ——
+   整句毫無破綻，只有拿原圖逐字比才抓得到。核對成本不壓到幾秒，就不會有人做。 */
+function renderCheck(qs,images){
+  const box=$('check');
+  if(!qs.length){ box.hidden=true; box.innerHTML=''; return; }
+  box.hidden=false;
+  box.innerHTML='<p class="chk__h">引文對照 —— 逐字比過再存</p>'+
+    qs.map((q,i)=>{
+      const hasMark=q.text.includes('〓');
+      return '<div class="chk__i" data-page="'+(q.page||'')+'">'+
+        '<p class="chk__q'+(hasMark?' warn':'')+'">'+esc(q.text)+'</p>'+
+        '<p class="chk__p">'+(q.page?'第 '+q.page+' 張照片　·　點這裡看原圖':'沒說出處 —— 特別要小心')+
+        (hasMark?'　·　有〓代表它讀不清，沒有硬猜':'')+'</p></div>';
+    }).join('')+
+    '<img class="chk__img" id="chkImg" hidden alt="">';
+  box.querySelectorAll('.chk__i').forEach(el=>{
+    el.onclick=()=>{
+      const p=Number(el.dataset.page);
+      const img=$('chkImg');
+      if(!p||!images[p-1]){ img.hidden=true; return; }
+      img.src=images[p-1]; img.hidden=false;
+      img.scrollIntoView({block:'nearest',behavior:'smooth'});
+    };
+  });
+}
+
 async function scan(e){
   const files=[...e.target.files].slice(0,12);
   if(!files.length) return;
@@ -365,11 +406,14 @@ async function scan(e){
     if(r.error){ $('scanMsg').textContent=r.error; return; }
     const d=r.draft||{};
     if(d.summary) $('nNote').value=d.summary;
-    if(d.quotes&&d.quotes.length) $('nQ').value=d.quotes.join('\\n');
+    // 舊格式是字串陣列，新格式是 {text,page}，兩種都吃
+    const qs=(d.quotes||[]).map(q=>typeof q==='string'?{text:q,page:null}:q).filter(q=>q&&q.text);
+    if(qs.length) $('nQ').value=qs.map(q=>q.text).join('\\n');
     if(d.tags&&d.tags.length) $('nTags').value=d.tags.join('、');
     if(d.angles){ $('angles').hidden=false; $('angles').textContent='可以從這裡下筆：'+d.angles; }
-    $('scanMsg').innerHTML='初稿好了 —— <b>上面那段是客觀整理，不是你的感想</b>，'+
-      '改成自己的話再存。引文是照片上抄的，可以核對。';
+    renderCheck(qs,images);
+    $('scanMsg').innerHTML='初稿好了 —— <b>上面那段是客觀整理，不是你的感想</b>，改成自己的話再存。'+
+      '<br>引文請逐字核對：點下面每一句可以叫出它宣稱的來源照片。';
     $('nNote').focus();
     $('nNote').setSelectionRange($('nNote').value.length,$('nNote').value.length);
   }catch(err){ $('scanMsg').textContent='出錯：'+err.message; }
@@ -458,5 +502,6 @@ $('addBtn').onclick=async()=>{
   ['fIsbn','fT','fA','fPub','fYr'].forEach(id=>$(id).value='');
   DB=await fetch('/api/books').then(r=>r.json());
 };
+window.__tool={renderCheck,shrink};   // 除錯用，這個工具不會部署
 load();
 </script></body></html>`;
