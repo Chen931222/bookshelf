@@ -86,6 +86,66 @@ http.createServer(async (req, res) => {
     }
   }
 
+  // 讀書頁照片 → 產出筆記初稿
+  if (url.pathname === '/api/draft' && req.method === 'POST') {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return send(res, 503, { error: '本機沒有 ANTHROPIC_API_KEY。設好環境變數再重開這個工具。' });
+    }
+    try {
+      const { images, book } = await readBody(req);
+      if (!images || !images.length) return send(res, 400, { error: '沒有收到照片' });
+      if (images.length > 12) return send(res, 400, { error: '一次最多 12 張' });
+
+      const Anthropic = require('@anthropic-ai/sdk');
+      const client = new Anthropic();
+
+      const content = images.map(d => ({
+        type: 'image',
+        source: { type: 'base64', media_type: 'image/jpeg', data: d.replace(/^data:[^,]+,/, '') }
+      }));
+      content.push({ type: 'text', text:
+`這些是《${book.t}》${book.a ? '（' + book.a + '）' : ''}的書頁照片，由書櫃主人自己拍的重點頁。
+
+請讀完後產出筆記初稿，回傳純 JSON（不要包在程式碼區塊裡）：
+{
+  "summary": "這幾頁在講什麼的重點整理，3-5 句繁體中文",
+  "quotes": ["直接抄自照片的句子", "..."],
+  "tags": ["概念標籤", "..."],
+  "angles": "兩三個可以下筆的角度，讓主人知道從哪裡開始寫自己的感想"
+}
+
+規則：
+- quotes 必須是照片上**真的看得到的句子**，一字不改地抄下來。看不清楚就不要收。**絕對不可以自己造句或改寫**——這是要放到公開網站上的引文。
+- 照片可能是直排、可能歪斜、可能有手寫劃線。劃線或折角處通常就是主人在意的地方，優先收。
+- tags 用概念層級的詞（例如「決策」「自由」「複利」），不要用書名或人名。
+- summary 是客觀整理，不要寫成第一人稱感想——感想要主人自己寫。
+- angles 是給主人的提問或切入點，不是替他回答。
+- 看不清楚的部分就略過，不要猜。` });
+
+      const msg = await client.messages.create({
+        model: 'claude-opus-5',
+        max_tokens: 8000,
+        system: '你在幫一位讀者整理他自己拍的書頁照片。你的工作是忠實整理與抄錄，不是替他發表感想。',
+        messages: [{ role: 'user', content }]
+      });
+
+      const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('');
+      let draft;
+      try {
+        draft = JSON.parse(text.replace(/^```(?:json)?|```$/gm, '').trim());
+      } catch (_) {
+        return send(res, 502, { error: '模型回傳的格式看不懂，再試一次。', raw: text.slice(0, 300) });
+      }
+      return send(res, 200, {
+        ok: true, draft,
+        usage: { in: msg.usage.input_tokens, out: msg.usage.output_tokens }
+      });
+    } catch (e) {
+      console.error(e);
+      return send(res, 500, { error: String(e.message || e) });
+    }
+  }
+
   // 新增一本書
   if (url.pathname === '/api/add' && req.method === 'POST') {
     try {
@@ -113,11 +173,21 @@ http.createServer(async (req, res) => {
   }
 
   send(res, 404, { error: 'not found' });
+}).on('error', err => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n  連接埠 ${PORT} 已經有人在用了 —— 多半是上一個沒關掉的書櫃工具。`);
+    console.error(`  先開 http://localhost:${PORT} 看看是不是已經跑著；`);
+    console.error(`  真的要重開就把舊的關掉（Windows: netstat -ano | findstr ${PORT} 找 PID 再 taskkill /PID <pid> /F）\n`);
+    process.exit(1);
+  }
+  throw err;
 }).listen(PORT, () => {
   const db = readDB();
   const done = db.books.filter(b => b.note && b.note.trim()).length;
-  console.log(`\n  書櫃工具  →  http://localhost:5174`);
-  console.log(`  目前 ${done} / ${db.books.length} 本有筆記\n`);
+  const key = process.env.ANTHROPIC_API_KEY ? '已設定' : '沒設定（掃描讀圖會用不了，手寫模式照常）';
+  console.log(`\n  書櫃工具  →  http://localhost:${PORT}`);
+  console.log(`  筆記進度：${done} / ${db.books.length} 本`);
+  console.log(`  ANTHROPIC_API_KEY：${key}\n`);
 });
 
 const PAGE = `<!doctype html><html lang="zh-Hant"><head>
@@ -166,6 +236,10 @@ button.go:disabled{opacity:.4;cursor:default}
 video{width:100%;max-width:420px;border:1px solid var(--faint);border-radius:2px;background:#000}
 .warn{border:1px solid var(--faint);border-left:2px solid var(--gold);padding:12px 14px;margin:16px 0;
  font-size:13px;line-height:1.8;color:rgba(242,236,224,.7)}
+.scan{border:1px dashed var(--faint);border-radius:2px;padding:16px;margin-top:26px}
+.scan label.go{display:inline-block}
+.angles{margin-top:10px;font-size:13px;line-height:1.85;color:rgba(242,236,224,.62);
+ border-left:2px solid var(--faint);padding-left:12px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:620px){.grid{grid-template-columns:1fr}.book{flex-direction:column}}
 </style></head><body><div class="wrap">
@@ -229,6 +303,15 @@ function next(){
       '<p class="who">'+esc(cur.a||'作者不詳')+(cur.yr?'　·　'+cur.yr:'')+'</p>'+
       (out?'<p class="out">'+esc(out)+'</p>':'')+
     '</div></div>'+
+    '<div class="scan">'+
+      '<div class="row" style="margin-top:0">'+
+        '<label for="shots" class="go" style="margin:0;color:var(--gold);border-color:var(--gold)">拍的書頁丟這裡</label>'+
+        '<input id="shots" type="file" accept="image/*" multiple hidden>'+
+        '<span class="hint" id="shotInfo" style="align-self:center;margin:0">5–15 頁重點就夠，不用整本</span>'+
+      '</div>'+
+      '<p class="msg" id="scanMsg"></p>'+
+      '<p class="angles" id="angles" hidden></p>'+
+    '</div>'+
     '<label>讀後心得</label>'+
     '<textarea id="nNote" rows="4" placeholder="三句話就好。它讓你想到什麼？改變了什麼？"></textarea>'+
     '<p class="hint">會顯示在公開網站上，而且進了 git 歷史就撤不回來 —— '+
@@ -241,6 +324,7 @@ function next(){
       '<button class="go primary" id="save">存起來，下一本</button>'+
       '<button class="go" id="skip">這本跳過</button>'+
     '</div><p class="msg" id="noteMsg"></p>';
+  $('shots').onchange=scan;
   $('nNote').focus();
   $('save').onclick=save;
   $('skip').onclick=()=>post({id:cur.id,skip:1});
@@ -248,6 +332,50 @@ function next(){
     if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();save();}
   });
 }
+/* 手機直出的照片動輒 4000px、好幾 MB。縮到長邊 2000 —— 讀中文字夠用，
+   又不會讓每張都吃掉近五千個 token。 */
+function shrink(file){
+  return new Promise((resolve,reject)=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const s=Math.min(1,2000/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg',0.82));
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('讀不到這張圖'));};
+    img.src=url;
+  });
+}
+async function scan(e){
+  const files=[...e.target.files].slice(0,12);
+  if(!files.length) return;
+  $('scanMsg').textContent='壓縮中…';
+  try{
+    const images=[];
+    for(let i=0;i<files.length;i++){
+      images.push(await shrink(files[i]));
+      $('scanMsg').textContent='壓縮中… '+(i+1)+'/'+files.length;
+    }
+    $('scanMsg').textContent='Claude 讀圖中…（'+files.length+' 頁，約十幾秒）';
+    const r=await fetch('/api/draft',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({images,book:{t:cur.t,a:cur.a}})}).then(r=>r.json());
+    if(r.error){ $('scanMsg').textContent=r.error; return; }
+    const d=r.draft||{};
+    if(d.summary) $('nNote').value=d.summary;
+    if(d.quotes&&d.quotes.length) $('nQ').value=d.quotes.join('\\n');
+    if(d.tags&&d.tags.length) $('nTags').value=d.tags.join('、');
+    if(d.angles){ $('angles').hidden=false; $('angles').textContent='可以從這裡下筆：'+d.angles; }
+    $('scanMsg').innerHTML='初稿好了 —— <b>上面那段是客觀整理，不是你的感想</b>，'+
+      '改成自己的話再存。引文是照片上抄的，可以核對。';
+    $('nNote').focus();
+    $('nNote').setSelectionRange($('nNote').value.length,$('nNote').value.length);
+  }catch(err){ $('scanMsg').textContent='出錯：'+err.message; }
+  finally{ e.target.value=''; }
+}
+
 function save(){
   post({ id:cur.id, note:$('nNote').value,
     quotes:$('nQ').value.split('\\n'),

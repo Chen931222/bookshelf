@@ -1034,7 +1034,8 @@
    },
    "note": "",
    "quotes": [],
-   "tags": []
+   "tags": [],
+   "noteSkip": 1
   },
   {
    "id": "lit-020",
@@ -3676,7 +3677,8 @@
    },
    "note": "",
    "quotes": [],
-   "tags": []
+   "tags": [],
+   "noteSkip": 1
   },
   {
    "id": "world-079",
@@ -4000,7 +4002,8 @@
    },
    "note": "",
    "quotes": [],
-   "tags": []
+   "tags": [],
+   "noteSkip": 1
   },
   {
    "id": "lang-087",
