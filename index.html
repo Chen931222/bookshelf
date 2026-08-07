@@ -213,6 +213,41 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   padding:.42em .85em;border:1px solid var(--faint);border-radius:2px;
   color:rgba(242,236,224,.72)}
 
+/* ---------- 深讀筆記：獨立長頁，點了才載 ---------- */
+.deep-link{display:inline-block;margin-top:1.6em;font-family:var(--mono);
+  font-size:clamp(11px,.75vw,13px);letter-spacing:.14em;color:var(--accent);
+  text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:2px;cursor:pointer}
+.deep-link:hover{opacity:.72}
+
+.deep{position:fixed;inset:0;z-index:78;background:var(--ink);overflow-y:auto;
+  visibility:hidden;opacity:0}
+.deep.is-on{visibility:visible;opacity:1}
+.deep__inner{max-width:min(720px,90vw);margin:0 auto;
+  padding:clamp(48px,10vh,130px) 0 clamp(80px,14vh,160px)}
+.deep__kicker{font-family:var(--mono);font-size:clamp(10px,.72vw,12px);letter-spacing:.24em;
+  text-transform:uppercase;color:#C08A4E}
+.deep__h{font-size:clamp(34px,5.6vw,66px);font-weight:600;line-height:1.08;margin-top:.24em}
+.deep__meta{margin-top:1.2em;font-family:var(--mono);font-size:clamp(10.5px,.72vw,12.5px);
+  letter-spacing:.06em;color:var(--dim);line-height:1.9}
+.deep__sec{margin-top:clamp(38px,6vh,64px)}
+.deep__sh{font-size:clamp(19px,1.9vw,26px);font-weight:600;line-height:1.4;
+  padding-bottom:.5em;border-bottom:1px solid var(--faint)}
+.deep__p{margin-top:1.5em;font-size:clamp(14.5px,1.02vw,17px);line-height:2.05;
+  color:rgba(242,236,224,.86)}
+.deep__q{margin:1.9em 0;padding-left:1.4em;border-left:2px solid #C08A4E}
+.deep__q p{font-size:clamp(15px,1.08vw,18px);line-height:1.9;font-style:italic;
+  color:rgba(242,236,224,.94)}
+.deep__q cite{display:block;margin-top:.7em;font-family:var(--mono);font-style:normal;
+  font-size:clamp(10px,.66vw,11.5px);letter-spacing:.12em;color:var(--dim)}
+.deep__mine{margin-top:clamp(48px,8vh,84px);border-top:1px solid var(--faint);padding-top:2em}
+.deep__mine h3{font-family:var(--mono);font-size:clamp(10px,.72vw,12px);letter-spacing:.22em;
+  text-transform:uppercase;color:#C08A4E;font-weight:400}
+.deep__mine .body{margin-top:1.2em;font-size:clamp(14.5px,1.02vw,17px);line-height:2.05;
+  color:rgba(242,236,224,.88)}
+.deep__mine .empty{margin-top:1.2em;font-size:clamp(13px,.9vw,15px);line-height:1.9;color:var(--dim)}
+.deep__foot{margin-top:clamp(40px,6vh,70px);font-family:var(--mono);
+  font-size:clamp(9.5px,.64vw,11px);line-height:2;color:rgba(242,236,224,.3)}
+
 /* ---------- 問書櫃 ---------- */
 .ask{position:fixed;inset:0;z-index:74;background:var(--ink);overflow-y:auto;
   visibility:hidden;opacity:0}
@@ -394,6 +429,10 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   </div>
 </section>
 <button class="cat__close" id="askClose" hidden style="z-index:76">Close</button>
+
+<!-- 深讀筆記：獨立長頁，內容放在 deep/<id>.json，點了才載 -->
+<section class="deep" id="deep" aria-label="深讀筆記"></section>
+<button class="cat__close" id="deepClose" hidden style="z-index:80">Close</button>
 
 <script>
 /* 書單資料在 books.json —— 加書、改筆記都只要編輯那個檔，不用動這裡 */
@@ -643,6 +682,9 @@ function detailHTML(b){
   }else if(!r.found&&!outline){
     h+='<p class="nores">網路上查不到這本的實質資料，以上僅為我的判斷。</p>';
   }
+  if(b.deep){
+    h+='<a class="deep-link" data-deep="'+esc(b.id)+'">深讀筆記 →</a>';
+  }
   if(r.sources&&r.sources.length){
     h+='<p class="srcs">資料來源：'+r.sources.slice(0,4).map(esc).join('　·　')+'</p>';
   }else if(outline&&!r.outline){
@@ -749,7 +791,8 @@ $("catClose").addEventListener("click",close);
 $("homeBtn").addEventListener("click",close);
 addEventListener("keydown",e=>{
   if(e.key!=="Escape") return;
-  if($("ask").classList.contains("is-on")) closeAsk();
+  if($("deep").classList.contains("is-on")) closeDeep();
+  else if($("ask").classList.contains("is-on")) closeAsk();
   else if(focus.classList.contains("is-on")) closeFocus();
   else if(listview.classList.contains("is-on")) closeList();
   else if(guest.classList.contains("is-on")) closeGuest();
@@ -782,6 +825,62 @@ function openGuest(){ guest.classList.add("is-on"); $("guestClose").hidden=false
 function closeGuest(){ guest.classList.remove("is-on"); $("guestClose").hidden=true; }
 $("guestLink").addEventListener("click",e=>{e.preventDefault();openGuest();});
 $("guestClose").addEventListener("click",closeGuest);
+
+/* ---------- 深讀筆記 ---------- */
+const deep=$("deep");
+const deepCache={};
+async function openDeep(id){
+  deep.innerHTML='<div class="deep__inner"><p class="deep__kicker">Loading</p></div>';
+  deep.classList.add("is-on"); $("deepClose").hidden=false; deep.scrollTop=0;
+  try{
+    if(!deepCache[id]){
+      deepCache[id]=await fetch('deep/'+id+'.json',{cache:'no-cache'}).then(r=>{
+        if(!r.ok) throw new Error('deep/'+id+'.json '+r.status);
+        return r.json();
+      });
+    }
+    deep.innerHTML=deepHTML(deepCache[id]);
+    deep.scrollTop=0;
+  }catch(e){
+    deep.innerHTML='<div class="deep__inner"><p class="deep__kicker">讀不到</p>'
+      +'<p class="deep__p">'+esc(e.message)+'</p></div>';
+  }
+}
+function closeDeep(){ deep.classList.remove("is-on"); $("deepClose").hidden=true; }
+function deepHTML(d){
+  let h='<div class="deep__inner">'
+    +'<p class="deep__kicker">深讀筆記</p>'
+    +'<h1 class="deep__h">'+esc(d.title)+'</h1>'
+    +'<p class="deep__meta">'+esc(d.author||'')+(d.pub?'　·　'+esc(d.pub):'')
+    +(d.source?'<br>'+esc(d.source):'')+'</p>';
+  (d.sections||[]).forEach(s=>{
+    h+='<section class="deep__sec">';
+    if(s.h) h+='<h2 class="deep__sh">'+esc(s.h)+'</h2>';
+    (s.blocks||[]).forEach(b=>{
+      if(b.t==='quote'){
+        h+='<blockquote class="deep__q"><p>'+esc(b.v)+'</p>'
+          +'<cite>'+esc(d.titleShort||d.title)+(b.p?'　p.'+esc(b.p):'')
+          +(b.kind?'　·　'+esc(b.kind):'')+'</cite></blockquote>';
+      }else{
+        h+='<p class="deep__p">'+esc(b.v)+'</p>';
+      }
+    });
+    h+='</section>';
+  });
+  h+='<div class="deep__mine"><h3>我的心得</h3>'
+    +(d.note&&d.note.trim()
+      ? '<div class="body">'+esc(d.note).replace(/\n/g,'<br>')+'</div>'
+      : '<p class="empty">還沒寫。這一段留給我自己。</p>')
+    +'</div>';
+  h+='<p class="deep__foot">這是讀書筆記：段落為重述，並非原文照錄；引號內為原書句子，標有頁碼。'
+    +'<br>著作權屬原作者與出版社所有。</p></div>';
+  return h;
+}
+$("deepClose").addEventListener("click",closeDeep);
+document.addEventListener("click",e=>{
+  const a=e.target.closest('[data-deep]');
+  if(a){ e.preventDefault(); openDeep(a.dataset.deep); }
+});
 
 /* ---------- 問書櫃 ---------- */
 const ask=$("ask"), askOut=$("askOut"), askIn=$("askIn"), askGo=$("askGo");
