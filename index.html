@@ -60,6 +60,12 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .card__count{display:block;font-family:var(--mono);font-size:clamp(10px,.63vw,12px);letter-spacing:.18em;color:var(--paper)}
 .card__rep{display:block;font-size:clamp(10.5px,.63vw,12px);line-height:1.6;color:rgba(242,236,224,.62);letter-spacing:.03em;margin-top:9px}
 .card__reading{display:block;font-family:var(--mono);font-size:clamp(9px,.5vw,10px);letter-spacing:.12em;color:rgba(242,236,224,.5);margin-top:6px}
+/* 深讀筆記不是一格書架，是文章。在一排實色橫幅裡改用金線描邊、不填滿，
+   讓它一眼看得出是另一種東西。（必須排在 .card 之後才蓋得掉 background） */
+.card--deep{background:#17140F;border:1px solid rgba(192,138,78,.5);filter:none}
+.card--deep::before,.card--deep::after{background:rgba(192,138,78,.38)}
+.card--deep .card__name i,.card--deep .card__count{color:#C08A4E}
+.card--deep:hover,.card--deep:focus-visible{filter:none;border-color:#C08A4E}
 
 .counter{position:fixed;left:50%;bottom:clamp(24px,2.6vw,46px);transform:translateX(-50%);
   z-index:40;display:flex;align-items:center;gap:9px;font-family:var(--mono);
@@ -296,6 +302,35 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .deep__top.is-on{opacity:1;pointer-events:auto}
 @media (min-width:1080px){.deep__top{display:none}}
 
+/* ── 深讀索引：首頁那張金色橫幅點進來的地方，壓在深讀內文底下一層 ── */
+.dx{position:fixed;inset:0;z-index:77;background:var(--ink);overflow-y:auto;
+  visibility:hidden;opacity:0}
+.dx.is-on{visibility:visible;opacity:1}
+.dx__inner{max-width:min(880px,90vw);margin:0 auto;
+  padding:clamp(56px,12vh,140px) 0 clamp(80px,14vh,160px)}
+.dx__kicker{font-family:var(--mono);font-size:clamp(10px,.72vw,12px);letter-spacing:.24em;
+  text-transform:uppercase;color:#C08A4E}
+.dx__h{font-size:clamp(34px,5.2vw,62px);font-weight:600;line-height:1.08;margin-top:.24em}
+.dx__sub{max-width:34em;margin-top:1.2em;font-size:clamp(13.5px,.98vw,16px);line-height:1.95;
+  color:rgba(242,236,224,.7)}
+.dx__list{list-style:none;margin-top:clamp(34px,6vh,66px);border-top:1px solid var(--faint)}
+.dx__item{display:grid;grid-template-columns:clamp(62px,7vw,98px) minmax(0,1fr);
+  gap:clamp(16px,2.4vw,34px);align-items:start;text-decoration:none;color:inherit;
+  padding:clamp(22px,3.6vh,38px) 0;border-bottom:1px solid var(--faint);
+  transition:opacity .3s}
+.dx__item:hover,.dx__item:focus-visible{opacity:.72;outline:none}
+.dx__cover{aspect-ratio:2/3;overflow:hidden;background:rgba(242,236,224,.05);
+  box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.dx__cover img{width:100%;height:100%;object-fit:cover;display:block}
+.dx__t{font-size:clamp(19px,2.1vw,29px);font-weight:600;line-height:1.28}
+.dx__a{margin-top:.55em;font-size:clamp(12px,.9vw,14.5px);color:rgba(242,236,224,.6)}
+.dx__specs{display:flex;flex-wrap:wrap;gap:clamp(12px,1.8vw,26px);margin-top:1.1em;
+  font-family:var(--mono);font-size:clamp(10px,.72vw,12px);letter-spacing:.08em;color:var(--dim)}
+.dx__go{margin-top:1.15em;font-family:var(--mono);font-size:clamp(10px,.7vw,11.5px);
+  letter-spacing:.2em;text-transform:uppercase;color:#C08A4E}
+.dx__foot{max-width:32em;margin-top:clamp(28px,4.5vh,50px);font-size:clamp(12px,.86vw,13.5px);
+  line-height:1.95;color:var(--dim)}
+
 /* ── 內文 ── */
 .deep__sec{margin-top:clamp(60px,10vh,124px)}
 .deep__sec:first-child{margin-top:0}
@@ -446,7 +481,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   <span class="counter__win"><span class="counter__strip" id="strip"></span></span>
   <span class="counter__dash">—</span><span class="counter__tot" id="total"></span>
 </div>
-<p class="hint">滾動 · 點類別看書</p>
+<p class="hint">滾動 · 點卡片進去</p>
 <canvas class="wipe" id="wipe"></canvas>
 
 <!-- 類別頁：3D 廊道 -->
@@ -508,6 +543,11 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 <section class="deep" id="deep" aria-label="深讀筆記"></section>
 <button class="cat__close" id="deepClose" hidden style="z-index:80">Close</button>
 
+<!-- 深讀筆記索引 -->
+<section class="dx" id="dx" aria-label="深讀筆記"><div class="dx__inner" id="dxInner"></div></section>
+<!-- z79：要壓過索引層（77）才看得到，又要讓深讀內文的 Close（80）在它之上 -->
+<button class="cat__close" id="dxClose" hidden style="z-index:79">Close</button>
+
 <script>
 /* 書單資料在 books.json —— 加書、改筆記都只要編輯那個檔，不用動這裡 */
 (async () => {
@@ -550,7 +590,21 @@ HOMECATS.forEach((c,i)=>{
   track.appendChild(li);
   strip.insertAdjacentHTML("beforeend","<span>"+(i+1)+"</span>");
 });
-$("total").textContent=HOMECATS.length;
+
+/* 深讀筆記也在首頁佔一格。它不是分類，所以不走 data-key，
+   計數器與捲動比例都改用 cardCount，不能再拿 HOMECATS.length 當總數。 */
+const DEEPS = BOOKS.filter(b=>b.deep);
+let cardCount = HOMECATS.length;
+if(DEEPS.length){
+  const li=document.createElement("li"); li.className="cell";
+  li.innerHTML='<a class="card card--deep" href="#deep" data-dx="1">'
+    +'<span class="card__name"><i>深讀筆記</i></span><span class="card__foot">'
+    +'<span class="card__count">'+DEEPS.length+' 篇</span>'
+    +'<span class="card__rep">'+esc(clean(DEEPS[0].t))+'</span></span></a>';
+  track.appendChild(li);
+  strip.insertAdjacentHTML("beforeend","<span>"+(++cardCount)+"</span>");
+}
+$("total").textContent=cardCount;
 
 let gtarget=0, graf=null;
 function onGWheel(e){
@@ -571,7 +625,7 @@ function gtick(){
 gallery.addEventListener("scroll",()=>{
   if(!graf) gtarget=gallery.scrollLeft;
   const max=gallery.scrollWidth-gallery.clientWidth;
-  const i=max?Math.round(gallery.scrollLeft/max*(HOMECATS.length-1)):0;
+  const i=max?Math.round(gallery.scrollLeft/max*(cardCount-1)):0;
   strip.style.transform="translateY(-"+(i*1.35)+"em)";
 },{passive:true});
 if(fine.matches) gallery.addEventListener("wheel",onGWheel,{passive:false});
@@ -859,13 +913,17 @@ async function close(){
   await sweep(c.color,1,0,1100); clearWipe();
   setBusy(false);
 }
-track.addEventListener("click",e=>{const card=e.target.closest(".card"); if(!card)return; e.preventDefault(); open(card.dataset.key);});
+track.addEventListener("click",e=>{
+  const card=e.target.closest(".card"); if(!card) return; e.preventDefault();
+  if(card.dataset.dx) openDX(); else open(card.dataset.key);
+});
 $("miscLink").addEventListener("click",e=>{e.preventDefault();open("misc");});
 $("catClose").addEventListener("click",close);
 $("homeBtn").addEventListener("click",close);
 addEventListener("keydown",e=>{
   if(e.key!=="Escape") return;
   if($("deep").classList.contains("is-on")) closeDeep();
+  else if(dx.classList.contains("is-on")) closeDX();
   else if($("ask").classList.contains("is-on")) closeAsk();
   else if(focus.classList.contains("is-on")) closeFocus();
   else if(listview.classList.contains("is-on")) closeList();
@@ -905,7 +963,10 @@ const deep=$("deep");
 const deepCache={};
 async function openDeep(id){
   deep.innerHTML='<div class="deep__inner"><p class="deep__kicker">Loading</p></div>';
-  deep.classList.add("is-on"); $("deepClose").hidden=false; deep.scrollTop=0;
+  /* 深讀的 Close（z80）跟索引的 Close（z71）在同一個座標，
+     留著兩顆疊在一起沒必要，開內文時先把下層那顆收起來 */
+  deep.classList.add("is-on"); $("deepClose").hidden=false; $("dxClose").hidden=true;
+  deep.scrollTop=0;
   try{
     if(!deepCache[id]){
       deepCache[id]=await fetch('deep/'+id+'.json',{cache:'no-cache'}).then(r=>{
@@ -922,14 +983,24 @@ async function openDeep(id){
       +'<p class="deep__p">'+esc(e.message)+'</p></div>';
   }
 }
-function closeDeep(){ deep.classList.remove("is-on"); $("deepClose").hidden=true; }
-function deepHTML(d,cover){
+function closeDeep(){
+  deep.classList.remove("is-on"); $("deepClose").hidden=true;
+  if(dx.classList.contains("is-on")) $("dxClose").hidden=false;   // 從索引進來的，退回索引
+}
+/* 索引頁和內頁都要顯示這組數字，算一次就好 */
+function deepStats(d){
   const secs=d.sections||[];
   const chars=secs.reduce((n,s)=>n+(s.blocks||[]).reduce((m,b)=>m+(b.v||'').length,0),0);
-  const mins=Math.max(1,Math.round(chars/400));      // 中文細讀抓每分鐘 400 字
   const last=String((secs[secs.length-1]||{}).pages||'').split('-');
-  const span=secs.length
-    ? 'p.'+String(secs[0].pages||'').split('-')[0]+'–'+(last[1]||last[0]) : '';
+  return {
+    secs, chars,
+    span: secs.length ? 'p.'+String(secs[0].pages||'').split('-')[0]+'–'+(last[1]||last[0]) : '',
+    words: (Math.round(chars/100)*100).toLocaleString('en-US'),
+    mins: Math.max(1,Math.round(chars/400))          // 中文細讀抓每分鐘 400 字
+  };
+}
+function deepHTML(d,cover){
+  const st=deepStats(d), secs=st.secs, mins=st.mins, span=st.span;
   const toc=secs.map((s,i)=>'<li><a href="#" data-sec="'+i+'">'
     +'<span class="pg">p.'+esc(String(s.pages||'').replace('-','–'))+'</span>'
     +'<span>'+esc(s.h||'')+'</span></a></li>').join('');
@@ -943,7 +1014,7 @@ function deepHTML(d,cover){
     +'<p class="deep__by">'+esc(d.author||'')+(d.pub?'　·　'+esc(d.pub):'')+'</p>'
     +'<dl class="deep__specs">'
     +(span?'<div><dt>涵蓋</dt><dd>'+esc(span)+'</dd></div>':'')
-    +'<div><dt>篇幅</dt><dd>約 '+(Math.round(chars/100)*100).toLocaleString('en-US')+' 字</dd></div>'
+    +'<div><dt>篇幅</dt><dd>約 '+st.words+' 字</dd></div>'
     +'<div><dt>閱讀</dt><dd>約 '+mins+' 分鐘</dd></div>'
     +'<div><dt>章節</dt><dd>'+secs.length+' 節</dd></div>'
     +'</dl>'
@@ -1012,6 +1083,63 @@ function wireDeep(){
   deepTop=deep.querySelector(".deep__top");
   deepSpy();
 }
+
+/* ---------- 深讀索引 ---------- */
+const dx=$("dx"), dxInner=$("dxInner"), DXC="#C08A4E";
+function dxHTML(metas){
+  let h='<p class="dx__kicker">Deep reads</p><h1 class="dx__h">深讀筆記</h1>'
+    +'<p class="dx__sub">挑幾本書，照我翻過的頁面順序把內容重新講一遍。'
+    +'故事講完整，不壓成論點式摘要；書裡的原句照舊引用並標頁碼。</p><ul class="dx__list">';
+  DEEPS.forEach((b,i)=>{
+    const m=metas&&metas[i];
+    h+='<li><a class="dx__item" href="#" data-deep="'+esc(b.id)+'">'
+      +'<div class="dx__cover">'+(b.cover?'<img src="'+esc(b.cover)+'" alt="">':'')+'</div>'
+      +'<div><div class="dx__t">'+esc(clean(b.t))+'</div>'
+      +'<div class="dx__a">'+esc(b.a||'')+(b.pub?'　·　'+esc(b.pub):'')+'</div>'
+      +(m?'<div class="dx__specs"><span>'+esc(m.span)+'</span>'
+        +'<span>約 '+m.words+' 字</span><span>約 '+m.mins+' 分鐘</span>'
+        +'<span>'+m.secs.length+' 節</span></div>':'')
+      +'<div class="dx__go">讀這篇 →</div></div></a></li>';
+  });
+  return h+'</ul>'
+    +'<p class="dx__foot">深讀筆記只挑少數幾本，會慢慢增加。'
+    +'其他書的心得、劃線和標籤，收在書櫃裡各本書自己的面板。</p>';
+}
+/* 順手把內文抓進 deepCache，點進去就不用再等一次。
+   篇數多到十幾篇以後這裡要改成只抓摘要，現在幾篇而已不值得先做。 */
+function dxMeta(){
+  return Promise.all(DEEPS.map(async b=>{
+    try{
+      if(!deepCache[b.id]){
+        deepCache[b.id]=await fetch('deep/'+b.id+'.json',{cache:'no-cache'})
+          .then(r=>r.ok?r.json():Promise.reject(new Error(String(r.status))));
+      }
+      return deepStats(deepCache[b.id]);
+    }catch(_){ return null; }      // 抓不到就只是少顯示數字，不擋整頁
+  }));
+}
+async function openDX(){
+  if(busy) return;
+  setBusy(true);
+  lastFocus=document.activeElement;
+  await sweep(DXC,0,1,1100);
+  dxInner.innerHTML=dxHTML(null);          // 先出版面，數字等抓完再補
+  dx.classList.add("is-on"); $("dxClose").hidden=false; dx.scrollTop=0;
+  $("dxClose").focus();
+  await sweep(DXC,1,0,1100); clearWipe();
+  setBusy(false);
+  dxMeta().then(ms=>{ if(dx.classList.contains("is-on")) dxInner.innerHTML=dxHTML(ms); });
+}
+async function closeDX(){
+  if(busy) return;
+  setBusy(true);
+  await sweep(DXC,0,1,1100);
+  dx.classList.remove("is-on"); $("dxClose").hidden=true;
+  if(lastFocus) lastFocus.focus();
+  await sweep(DXC,1,0,1100); clearWipe();
+  setBusy(false);
+}
+$("dxClose").addEventListener("click",closeDX);
 $("deepClose").addEventListener("click",closeDeep);
 document.addEventListener("click",e=>{
   const a=e.target.closest('[data-deep]');
