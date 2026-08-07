@@ -230,6 +230,9 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .deep__meta{margin-top:1.2em;font-family:var(--mono);font-size:clamp(10.5px,.72vw,12.5px);
   letter-spacing:.06em;color:var(--dim);line-height:1.9}
 .deep__sec{margin-top:clamp(38px,6vh,64px)}
+/* 每節自己的頁碼錨點。引文可能被去重掉，這行保證每一節都指得出出處。 */
+.deep__pages{font-family:var(--mono);font-size:clamp(10px,.68vw,11.5px);
+  letter-spacing:.1em;color:var(--dim);margin-bottom:.75em}
 .deep__sh{font-size:clamp(19px,1.9vw,26px);font-weight:600;line-height:1.4;
   padding-bottom:.5em;border-bottom:1px solid var(--faint)}
 .deep__p{margin-top:1.5em;font-size:clamp(14.5px,1.02vw,17px);line-height:2.05;
@@ -855,6 +858,7 @@ function deepHTML(d){
     +(d.source?'<br>'+esc(d.source):'')+'</p>';
   (d.sections||[]).forEach(s=>{
     h+='<section class="deep__sec">';
+    if(s.pages) h+='<p class="deep__pages">p.'+esc(String(s.pages).replace('-','–'))+'</p>';
     if(s.h) h+='<h2 class="deep__sh">'+esc(s.h)+'</h2>';
     (s.blocks||[]).forEach(b=>{
       if(b.t==='quote'){
@@ -872,7 +876,8 @@ function deepHTML(d){
       ? '<div class="body">'+esc(d.note).replace(/\n/g,'<br>')+'</div>'
       : '<p class="empty">還沒寫。這一段留給我自己。</p>')
     +'</div>';
-  h+='<p class="deep__foot">這是讀書筆記：段落為重述，並非原文照錄；引號內為原書句子，標有頁碼。'
+  // 措辭要對得起實情：重述段落裡確實留著原書的句子，不能說成「並非原文照錄」。
+  h+='<p class="deep__foot">這是讀書筆記：內文為重述，其中保留原書的部分語句；獨立引文標示頁碼。'
     +'<br>著作權屬原作者與出版社所有。</p></div>';
   return h;
 }
