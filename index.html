@@ -275,9 +275,30 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   font-size:12.5px;line-height:1.5;transition:color .25s;
   text-wrap:pretty}   /* 目錄項會斷成末行只剩一個字，交給瀏覽器平衡 */
 .deep__toc a:hover{color:rgba(242,236,224,.78)}
-.deep__toc a.is-cur{color:#C08A4E}
+.deep__toc a.is-cur,.deep__tc.is-cur>a{color:#C08A4E}
 .deep__toc .pg{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
   opacity:.75;margin-bottom:.3em}
+/* 只展開正在讀的那一章的小標，其餘收起來 */
+.deep__tsub{list-style:none;margin-top:.6em;display:none}
+.deep__tc.is-cur .deep__tsub{display:block}
+.deep__tsub li{margin-top:.5em}
+.deep__tsub a{font-size:11.5px;line-height:1.45;color:rgba(242,236,224,.34)}
+.deep__tsub a:hover{color:rgba(242,236,224,.72)}
+.deep__toc{max-height:calc(100vh - 150px);overflow-y:auto;scrollbar-width:none}
+.deep__toc::-webkit-scrollbar{display:none}
+
+/* ── 章 ── */
+.deep__ch{margin-top:clamp(76px,13vh,170px)}
+.deep__ch:first-child{margin-top:0}
+.deep__chn{font-family:var(--mono);font-size:clamp(10px,.68vw,11.5px);letter-spacing:.2em;color:#C08A4E}
+.deep__cht{margin-top:.45em;font-size:clamp(23px,3vw,38px);font-weight:600;line-height:1.22;
+  padding-bottom:.5em;border-bottom:1px solid rgba(192,138,78,.42)}
+.deep__g{margin-top:clamp(46px,7.5vh,92px)}
+.deep__ch>.deep__g:first-of-type{margin-top:clamp(28px,4.6vh,52px)}
+/* 沒拍到的段落畫一條斷線說清楚，免得讀起來像連續的 */
+.deep__gap{display:flex;align-items:center;gap:.9em;margin-bottom:1.5em;
+  font-family:var(--mono);font-size:clamp(9.5px,.62vw,11px);letter-spacing:.14em;color:var(--dim)}
+.deep__gap::before,.deep__gap::after{content:"";flex:1;height:1px;background:var(--faint)}
 /* 桌機有側邊固定目錄就不需要這兩個；反過來也是 */
 .deep__tocm{display:none;margin-top:clamp(26px,4vh,42px);padding:1.3em 0;
   border-top:1px solid var(--faint);border-bottom:1px solid var(--faint)}
@@ -332,9 +353,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   line-height:1.95;color:var(--dim)}
 
 /* ── 內文 ── */
-.deep__sec{margin-top:clamp(60px,10vh,124px)}
-.deep__sec:first-child{margin-top:0}
-/* 每節自己的頁碼錨點，兼作視覺呼吸點。引文可能被去重掉，這行保證每節都指得出出處。 */
+/* 每群自己的頁碼錨點，兼作視覺呼吸點。引文可能被去重掉，這行保證每群都指得出出處。 */
 .deep__pages{display:flex;align-items:center;gap:.85em;margin-bottom:.95em;
   font-family:var(--mono);font-size:clamp(10px,.68vw,11.5px);letter-spacing:.14em;color:#C08A4E}
 .deep__pages::before{content:"";flex:none;width:clamp(18px,2vw,30px);height:1px;
@@ -989,21 +1008,55 @@ function closeDeep(){
 }
 /* 索引頁和內頁都要顯示這組數字，算一次就好 */
 function deepStats(d){
-  const secs=d.sections||[];
-  const chars=secs.reduce((n,s)=>n+(s.blocks||[]).reduce((m,b)=>m+(b.v||'').length,0),0);
-  const last=String((secs[secs.length-1]||{}).pages||'').split('-');
+  const chs=d.chapters||[];
+  const groups=chs.reduce((a,c)=>a.concat(c.groups||[]),[]);
+  const chars=groups.reduce((n,g)=>n+(g.blocks||[]).reduce((m,b)=>m+(b.v||'').length,0),0);
+  const nums=groups.reduce((a,g)=>a.concat((String(g.pages||'').match(/\d+/g)||[]).map(Number)),[]);
   return {
-    secs, chars,
-    span: secs.length ? 'p.'+String(secs[0].pages||'').split('-')[0]+'–'+(last[1]||last[0]) : '',
+    chs, groups, chars,
+    span: nums.length ? 'p.'+Math.min.apply(null,nums)+'–'+Math.max.apply(null,nums) : '',
     words: (Math.round(chars/100)*100).toLocaleString('en-US'),
     mins: Math.max(1,Math.round(chars/400))          // 中文細讀抓每分鐘 400 字
   };
 }
 function deepHTML(d,cover){
-  const st=deepStats(d), secs=st.secs, mins=st.mins, span=st.span;
-  const toc=secs.map((s,i)=>'<li><a href="#" data-sec="'+i+'">'
-    +'<span class="pg">p.'+esc(String(s.pages||'').replace('-','–'))+'</span>'
-    +'<span>'+esc(s.h||'')+'</span></a></li>').join('');
+  const st=deepStats(d), mins=st.mins, span=st.span;
+  /* 兩層目錄：側邊固定的那份只列章名，捲到哪一章才把該章的小標展開。
+     四萬多字如果把 45 個小標全攤出來，目錄自己就比一屏還高。 */
+  const toc=[], mtoc=[], body=[];
+  let gi=0;
+  st.chs.forEach((c,ci)=>{
+    const first=gi, subs=[];
+    let s='<section class="deep__ch">'
+      +'<p class="deep__chn">'+esc((c.label?c.label+'　·　':'')+(c.span||''))+'</p>'
+      +'<h2 class="deep__cht">'+esc(c.title||'')+'</h2>';
+    (c.groups||[]).forEach(g=>{
+      s+='<div class="deep__g" id="dg-'+gi+'" data-ch="'+ci+'">';
+      // 沒拍到的段落要明說，不然讀起來會以為是連續的
+      if(g.gap) s+='<p class="deep__gap">中間跳過 '+esc(g.gap)+'</p>';
+      if(g.pages) s+='<p class="deep__pages">p.'+esc(String(g.pages).replace('-','–'))+'</p>';
+      if(g.h) s+='<h3 class="deep__sh">'+esc(g.h)+'</h3>';
+      (g.blocks||[]).forEach(b=>{
+        if(b.t==='quote'){
+          s+='<blockquote class="deep__q"><p>'+esc(b.v)+'</p>'
+            +'<cite>'+esc(d.titleShort||d.title)+(b.p?'　p.'+esc(b.p):'')
+            +(b.kind?'　·　'+esc(b.kind):'')+'</cite></blockquote>';
+        }else{
+          s+='<p class="deep__p">'+esc(b.v)+'</p>';
+        }
+      });
+      s+='</div>';
+      if(g.h) subs.push('<li><a href="#" data-sec="'+gi+'">'+esc(g.h)+'</a></li>');
+      gi++;
+    });
+    body.push(s+'</section>');
+
+    const label='<span class="pg">'+esc(c.span||'')+'</span>'
+      +'<span class="lb">'+esc((c.label?c.label+' ':'')+(c.title||''))+'</span>';
+    toc.push('<li class="deep__tc" data-ch="'+ci+'"><a href="#" data-sec="'+first+'">'+label+'</a>'
+      +(subs.length?'<ol class="deep__tsub">'+subs.join('')+'</ol>':'')+'</li>');
+    mtoc.push('<li><a href="#" data-sec="'+first+'">'+label+'</a></li>');
+  });
 
   let h='<div class="deep__inner">'
     +'<header class="deep__head">'
@@ -1016,29 +1069,14 @@ function deepHTML(d,cover){
     +(span?'<div><dt>涵蓋</dt><dd>'+esc(span)+'</dd></div>':'')
     +'<div><dt>篇幅</dt><dd>約 '+st.words+' 字</dd></div>'
     +'<div><dt>閱讀</dt><dd>約 '+mins+' 分鐘</dd></div>'
-    +'<div><dt>章節</dt><dd>'+secs.length+' 節</dd></div>'
+    +'<div><dt>章節</dt><dd>'+st.chs.length+' 章</dd></div>'
     +'</dl>'
     +(d.source?'<p class="deep__source">'+esc(d.source)+'</p>':'')
     +'</div></header>'
-    +'<nav class="deep__tocm"><h4>目錄</h4><ol>'+toc+'</ol></nav>'
+    +'<nav class="deep__tocm"><h4>目錄</h4><ol>'+mtoc.join('')+'</ol></nav>'
     +'<div class="deep__body">'
-    +'<nav class="deep__toc"><h4>目錄</h4><ol>'+toc+'</ol></nav>'
-    +'<div class="deep__col">';
-  secs.forEach(s=>{
-    h+='<section class="deep__sec">';
-    if(s.pages) h+='<p class="deep__pages">p.'+esc(String(s.pages).replace('-','–'))+'</p>';
-    if(s.h) h+='<h2 class="deep__sh">'+esc(s.h)+'</h2>';
-    (s.blocks||[]).forEach(b=>{
-      if(b.t==='quote'){
-        h+='<blockquote class="deep__q"><p>'+esc(b.v)+'</p>'
-          +'<cite>'+esc(d.titleShort||d.title)+(b.p?'　p.'+esc(b.p):'')
-          +(b.kind?'　·　'+esc(b.kind):'')+'</cite></blockquote>';
-      }else{
-        h+='<p class="deep__p">'+esc(b.v)+'</p>';
-      }
-    });
-    h+='</section>';
-  });
+    +'<nav class="deep__toc"><h4>目錄</h4><ol>'+toc.join('')+'</ol></nav>'
+    +'<div class="deep__col">'+body.join('');
   h+='<div class="deep__mine"><h3>我的心得</h3>'
     +(d.note&&d.note.trim()
       ? '<div class="body">'+esc(d.note).replace(/\n/g,'<br>')+'</div>'
@@ -1053,7 +1091,7 @@ function deepHTML(d,cover){
 }
 
 /* 目錄高亮與回頂部。捲動容器是 .deep 不是視窗，座標一律相對它算。 */
-let deepSecs=[], deepLinks=[], deepTop=null, deepTick=false;
+let deepSecs=[], deepLinks=[], deepChaps=[], deepTop=null, deepTick=false;
 function deepSpy(){
   deepTick=false;
   if(!deepSecs.length) return;
@@ -1061,6 +1099,9 @@ function deepSpy(){
   let cur=0;
   deepSecs.forEach((s,i)=>{ if(s.getBoundingClientRect().top<=line) cur=i; });
   deepLinks.forEach(a=>a.classList.toggle("is-cur",+a.dataset.sec===cur));
+  // 章要一起標，側邊目錄靠它決定展開哪一章的小標
+  const ch=deepSecs[cur].dataset.ch;
+  deepChaps.forEach(el=>el.classList.toggle("is-cur",el.dataset.ch===ch));
   if(deepTop) deepTop.classList.toggle("is-on",deep.scrollTop>deep.clientHeight*.6);
 }
 /* 這兩個 listener 只掛一次。每開一本只換上面那三個參考——
@@ -1078,8 +1119,9 @@ deep.addEventListener("click",e=>{
   if(e.target.closest(".deep__top")) deep.scrollTo({top:0,behavior:"smooth"});
 });
 function wireDeep(){
-  deepSecs=[...deep.querySelectorAll(".deep__sec")];
+  deepSecs=[...deep.querySelectorAll(".deep__g")];
   deepLinks=[...deep.querySelectorAll("[data-sec]")];
+  deepChaps=[...deep.querySelectorAll(".deep__tc")];
   deepTop=deep.querySelector(".deep__top");
   deepSpy();
 }
@@ -1098,7 +1140,7 @@ function dxHTML(metas){
       +'<div class="dx__a">'+esc(b.a||'')+(b.pub?'　·　'+esc(b.pub):'')+'</div>'
       +(m?'<div class="dx__specs"><span>'+esc(m.span)+'</span>'
         +'<span>約 '+m.words+' 字</span><span>約 '+m.mins+' 分鐘</span>'
-        +'<span>'+m.secs.length+' 節</span></div>':'')
+        +'<span>'+m.chs.length+' 章</span></div>':'')
       +'<div class="dx__go">讀這篇 →</div></div></a></li>';
   });
   return h+'</ul>'
