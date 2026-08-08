@@ -15,6 +15,10 @@
   --dim:rgba(242,236,224,.42);
   --faint:rgba(242,236,224,.16);
   --card-w:clamp(210px,18.6vw,358px);
+  /* 深讀頁兩個強調色各有職務：金色是我加的裝置（頁碼、目錄、我的話），
+     紅色只代表原書自己的標記（紅框標語、分節符號、進度）。取自書頁照片
+     實測的 #98525D（色相 351°），暖光洗掉的飽和度補回來。 */
+  --red:#BE5060;
   --serif:"Noto Serif TC","Source Han Serif TC","Songti TC",serif;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
 }
@@ -265,7 +269,8 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .deep__body{display:grid;grid-template-columns:1fr min(600px,100%) 1fr;
   column-gap:clamp(24px,3vw,56px);margin-top:clamp(38px,6.5vh,78px)}
 .deep__col{grid-column:2;min-width:0}
-.deep__toc{grid-column:1;justify-self:end;width:min(212px,100%);text-align:right;
+/* 目錄是拿來「找」的，左對齊給眼睛一條穩定的軸；區塊本身仍貼著版心那側 */
+.deep__toc{grid-column:1;justify-self:end;width:min(212px,100%);text-align:left;
   position:sticky;top:clamp(36px,8vh,104px);align-self:start}
 .deep__toc h4,.deep__tocm h4{font-family:var(--mono);font-size:10px;letter-spacing:.22em;
   text-transform:uppercase;color:#C08A4E;font-weight:400}
@@ -290,15 +295,32 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 /* ── 章 ── */
 .deep__ch{margin-top:clamp(76px,13vh,170px)}
 .deep__ch:first-child{margin-top:0}
-.deep__chn{font-family:var(--mono);font-size:clamp(10px,.68vw,11.5px);letter-spacing:.2em;color:#C08A4E}
-.deep__cht{margin-top:.45em;font-size:clamp(23px,3vw,38px);font-weight:600;line-height:1.22;
-  padding-bottom:.5em;border-bottom:1px solid rgba(192,138,78,.42)}
+/* 章扉：巨大的章號當底、章名壓在上面。中文沒有 drop cap 的傳統，這是等價物 */
+.deep__chhead{position:relative;padding-top:clamp(26px,5vh,58px)}
+.deep__chbig{position:absolute;left:-.08em;top:0;line-height:.78;
+  font-size:clamp(96px,13vw,190px);font-weight:600;color:rgba(192,138,78,.11);
+  pointer-events:none;user-select:none}
+.deep__chn{position:relative;font-family:var(--mono);font-size:clamp(10px,.68vw,11.5px);
+  letter-spacing:.2em;color:#C08A4E}
+.deep__cht{position:relative;margin-top:.45em;font-size:clamp(23px,3vw,38px);font-weight:600;
+  line-height:1.22;padding-bottom:.5em;border-bottom:1px solid rgba(192,138,78,.42)}
+/* 章題詞：原書紅框標語升級成大字引文，一章只有一句 */
+.deep__epi{margin-top:clamp(24px,4vh,44px);padding:clamp(18px,2.6vh,30px) clamp(18px,2.4vw,30px);
+  border:1px solid rgba(190,80,96,.5)}
+.deep__epi p{font-size:clamp(18px,1.62vw,27px);line-height:1.72;font-weight:500;
+  color:rgba(242,236,224,.96);text-indent:0}
+.deep__epi cite{display:block;margin-top:.9em;font-family:var(--mono);font-style:normal;
+  font-size:clamp(9.5px,.64vw,11px);letter-spacing:.12em;color:var(--red)}
+/* 書上用三顆紅星號分節，網頁照搬——比一條細線更像那本書 */
+.deep__star{margin:clamp(34px,5.5vh,64px) 0 clamp(26px,4vh,44px);text-align:center;
+  font-size:clamp(11px,.8vw,13px);letter-spacing:1.1em;text-indent:1.1em;color:var(--red);opacity:.72}
 .deep__g{margin-top:clamp(46px,7.5vh,92px)}
 .deep__ch>.deep__g:first-of-type{margin-top:clamp(28px,4.6vh,52px)}
 /* 沒拍到的段落畫一條斷線說清楚，免得讀起來像連續的 */
-.deep__gap{display:flex;align-items:center;gap:.9em;margin-bottom:1.5em;
-  font-family:var(--mono);font-size:clamp(9.5px,.62vw,11px);letter-spacing:.14em;color:var(--dim)}
-.deep__gap::before,.deep__gap::after{content:"";flex:1;height:1px;background:var(--faint)}
+/* 頂部閱讀進度條。兩小時的長文，讀者要看得到自己在哪 */
+.deep__prog{position:fixed;left:0;right:0;top:0;z-index:81;height:2px;background:rgba(242,236,224,.07)}
+.deep__prog i{display:block;height:100%;background:var(--red);
+  transform:scaleX(0);transform-origin:0 50%;will-change:transform}
 /* 桌機有側邊固定目錄就不需要這兩個；反過來也是 */
 .deep__tocm{display:none;margin-top:clamp(26px,4vh,42px);padding:1.3em 0;
   border-top:1px solid var(--faint);border-bottom:1px solid var(--faint)}
@@ -360,11 +382,18 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   background:#C08A4E;opacity:.5}
 .deep__sh{font-size:clamp(19px,1.9vw,26px);font-weight:600;line-height:1.4;
   padding-bottom:.5em;border-bottom:1px solid var(--faint)}
-.deep__p{margin-top:1.5em;font-size:clamp(14.5px,1.02vw,17px);line-height:2.05;
+/* 段首空兩格、段距收窄——像書，不像網頁。行高 1.95 是中文長文的甜蜜點 */
+.deep__p{margin-top:.55em;text-indent:2em;font-size:clamp(14.5px,1.02vw,17px);line-height:1.95;
   color:rgba(242,236,224,.86)}
+.deep__sh+.deep__p,.deep__pages+.deep__p{margin-top:1.2em}
 .deep__q{margin:1.9em 0;padding-left:1.4em;border-left:2px solid #C08A4E}
+/* 原書紅框裡的句子：用書自己的紅細框，跟一般引文分層 */
+.deep__q--box{padding:clamp(14px,1.8vh,20px) clamp(15px,1.8vw,22px);
+  border:1px solid rgba(190,80,96,.45);border-left-width:1px}
+.deep__q--box p{font-style:normal;font-weight:500}
+.deep__q--box cite{color:var(--red)}
 .deep__q p{font-size:clamp(15px,1.08vw,18px);line-height:1.9;font-style:italic;
-  color:rgba(242,236,224,.94)}
+  color:rgba(242,236,224,.94);text-indent:0}
 .deep__q cite{display:block;margin-top:.7em;font-family:var(--mono);font-style:normal;
   font-size:clamp(10px,.66vw,11.5px);letter-spacing:.12em;color:var(--dim)}
 .deep__mine{margin-top:clamp(48px,8vh,84px);border-top:1px solid var(--faint);padding-top:2em}
@@ -1027,20 +1056,31 @@ function deepHTML(d,cover){
   let gi=0;
   st.chs.forEach((c,ci)=>{
     const first=gi, subs=[];
-    let s='<section class="deep__ch">'
+    const cite=b=>esc(d.titleShort||d.title)+(b.p?'　p.'+esc(b.p):'')
+      +(b.kind?'　·　'+esc(b.kind):'');
+    /* 章題詞：優先用原書自己的紅框標語。③ 和 ⑨ 兩章書上沒放紅框，
+       退而挑該章最長的一句——短句多半是殘句，撐不起題詞。 */
+    const qs=(c.groups||[]).reduce((a,g)=>a.concat((g.blocks||[]).filter(b=>b.t==='quote')),[]);
+    const epi=qs.filter(b=>b.kind)[0]
+      || qs.slice().sort((a,b)=>b.v.length-a.v.length)[0] || null;
+
+    let s='<section class="deep__ch"><div class="deep__chhead">'
+      +'<span class="deep__chbig" aria-hidden="true">'+esc(c.label||(c.title||'').slice(0,1))+'</span>'
       +'<p class="deep__chn">'+esc((c.label?c.label+'　·　':'')+(c.span||''))+'</p>'
-      +'<h2 class="deep__cht">'+esc(c.title||'')+'</h2>';
-    (c.groups||[]).forEach(g=>{
+      +'<h2 class="deep__cht">'+esc(c.title||'')+'</h2></div>'
+      +(epi?'<blockquote class="deep__epi"><p>'+esc(epi.v)+'</p><cite>'+cite(epi)+'</cite></blockquote>':'');
+
+    (c.groups||[]).forEach((g,ig)=>{
+      // 書上用三顆紅星號分節：沒有小標的續段、或選讀跳頁的地方，就是換一景
+      if(ig>0 && (!g.h || g.gap)) s+='<p class="deep__star" aria-hidden="true">✱ ✱ ✱</p>';
       s+='<div class="deep__g" id="dg-'+gi+'" data-ch="'+ci+'">';
-      // 沒拍到的段落要明說，不然讀起來會以為是連續的
-      if(g.gap) s+='<p class="deep__gap">中間跳過 '+esc(g.gap)+'</p>';
       if(g.pages) s+='<p class="deep__pages">p.'+esc(String(g.pages).replace('-','–'))+'</p>';
       if(g.h) s+='<h3 class="deep__sh">'+esc(g.h)+'</h3>';
       (g.blocks||[]).forEach(b=>{
+        if(b===epi) return;                          // 已經升格成題詞，不要再出現一次
         if(b.t==='quote'){
-          s+='<blockquote class="deep__q"><p>'+esc(b.v)+'</p>'
-            +'<cite>'+esc(d.titleShort||d.title)+(b.p?'　p.'+esc(b.p):'')
-            +(b.kind?'　·　'+esc(b.kind):'')+'</cite></blockquote>';
+          s+='<blockquote class="deep__q'+(b.kind?' deep__q--box':'')+'"><p>'+esc(b.v)+'</p>'
+            +'<cite>'+cite(b)+'</cite></blockquote>';
         }else{
           s+='<p class="deep__p">'+esc(b.v)+'</p>';
         }
@@ -1086,14 +1126,19 @@ function deepHTML(d,cover){
   h+='<p class="deep__foot">這是讀書筆記：內文為重述，其中保留原書的部分語句；獨立引文標示頁碼。'
     +'<br>著作權屬原作者與出版社所有。</p>'
     +'</div></div></div>'
+    +'<div class="deep__prog" aria-hidden="true"><i></i></div>'
     +'<button class="deep__top" type="button" aria-label="回到頂端">↑</button>';
   return h;
 }
 
 /* 目錄高亮與回頂部。捲動容器是 .deep 不是視窗，座標一律相對它算。 */
-let deepSecs=[], deepLinks=[], deepChaps=[], deepTop=null, deepTick=false;
+let deepSecs=[], deepLinks=[], deepChaps=[], deepTop=null, deepProg=null, deepTick=false;
 function deepSpy(){
   deepTick=false;
+  if(deepProg){
+    const room=deep.scrollHeight-deep.clientHeight;
+    deepProg.style.transform="scaleX("+(room>0?Math.min(1,deep.scrollTop/room):0)+")";
+  }
   if(!deepSecs.length) return;
   const line=deep.getBoundingClientRect().top+deep.clientHeight*.28;
   let cur=0;
@@ -1123,6 +1168,7 @@ function wireDeep(){
   deepLinks=[...deep.querySelectorAll("[data-sec]")];
   deepChaps=[...deep.querySelectorAll(".deep__tc")];
   deepTop=deep.querySelector(".deep__top");
+  deepProg=deep.querySelector(".deep__prog i");
   deepSpy();
 }
 
