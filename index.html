@@ -351,7 +351,32 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   color:rgba(242,236,224,.7);font-family:var(--mono);font-size:15px;cursor:pointer;
   opacity:0;pointer-events:none;transition:opacity .3s}
 .deep__top.is-on{opacity:1;pointer-events:auto}
-@media (min-width:1080px){.deep__top{display:none}}
+/* 手機讀到一半要換章，本來得整段捲回頁首。這顆鈕就地叫出章節表，
+   位置不會跑掉；桌機有側邊固定目錄，不需要。 */
+.deep__nav{position:fixed;right:clamp(14px,3vw,26px);z-index:79;
+  bottom:calc(clamp(14px,3vw,26px) + 54px);
+  height:44px;padding:0 17px;border-radius:22px;border:1px solid var(--faint);
+  background:rgba(20,19,16,.9);backdrop-filter:blur(6px);color:rgba(242,236,224,.8);
+  font-family:var(--mono);font-size:12px;letter-spacing:.14em;cursor:pointer;
+  opacity:0;pointer-events:none;transition:opacity .3s}
+.deep__nav.is-on{opacity:1;pointer-events:auto}
+.deep__sheet{position:fixed;inset:0;z-index:82;background:rgba(14,13,11,.975);
+  overflow-y:auto;overscroll-behavior:contain;
+  visibility:hidden;opacity:0;transition:opacity .22s}
+.deep__sheet.is-on{visibility:visible;opacity:1}
+.deep__sheet__in{max-width:min(560px,90vw);margin:0 auto;padding:clamp(22px,4.5vh,44px) 0 60px}
+.deep__sheet__hd{display:flex;justify-content:space-between;align-items:baseline;gap:1em;
+  padding-bottom:1em;border-bottom:1px solid var(--faint);
+  font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:#C08A4E}
+.deep__sheet__x{background:none;border:0;padding:0;color:var(--dim);font-family:var(--mono);
+  font-size:11px;letter-spacing:.16em;cursor:pointer}
+.deep__sheet ol{list-style:none;margin-top:1.5em}
+.deep__sheet li+li{margin-top:.95em}
+.deep__sheet a{display:flex;gap:1em;align-items:baseline;text-decoration:none;
+  color:rgba(242,236,224,.78);font-size:15px;line-height:1.5}
+.deep__sheet a.is-cur{color:#C08A4E}
+.deep__sheet .pg{flex:none;min-width:5.6em;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+@media (min-width:1080px){.deep__top,.deep__nav,.deep__sheet{display:none}}
 
 /* ── 深讀索引：首頁那張金色橫幅點進來的地方，壓在深讀內文底下一層 ── */
 .dx{position:fixed;inset:0;z-index:77;background:var(--ink);overflow-y:auto;
@@ -981,7 +1006,8 @@ $("catClose").addEventListener("click",close);
 $("homeBtn").addEventListener("click",close);
 addEventListener("keydown",e=>{
   if(e.key!=="Escape") return;
-  if($("deep").classList.contains("is-on")) closeDeep();
+  if(deepSheet&&deepSheet.classList.contains("is-on")) closeSheet();
+  else if($("deep").classList.contains("is-on")) closeDeep();
   else if(dx.classList.contains("is-on")) closeDX();
   else if($("ask").classList.contains("is-on")) closeAsk();
   else if(focus.classList.contains("is-on")) closeFocus();
@@ -1043,6 +1069,7 @@ async function openDeep(id){
   }
 }
 function closeDeep(){
+  closeSheet();
   deep.classList.remove("is-on"); $("deepClose").hidden=true;
   if(dx.classList.contains("is-on")) $("dxClose").hidden=false;   // 從索引進來的，退回索引
 }
@@ -1141,13 +1168,18 @@ function deepHTML(d,cover){
     +'<br>著作權屬原作者與出版社所有。</p>'
     +'</div></div></div>'
     +'<div class="deep__prog" aria-hidden="true"><i></i></div>'
-    +'<button class="deep__top" type="button" aria-label="回到頂端">↑</button>';
+    +'<button class="deep__nav" type="button">目錄</button>'
+    +'<button class="deep__top" type="button" aria-label="回到頂端">↑</button>'
+    +'<div class="deep__sheet"><div class="deep__sheet__in">'
+    +'<div class="deep__sheet__hd"><span>目錄　'+st.chs.length+' 章</span>'
+    +'<button class="deep__sheet__x" type="button">關閉</button></div>'
+    +'<ol>'+mtoc.join('')+'</ol></div></div>';
   return h;
 }
 
 /* 目錄高亮與回頂部。捲動容器是 .deep 不是視窗，座標一律相對它算。 */
 let deepSecs=[], deepLinks=[], deepChaps=[], deepTop=null, deepProg=null,
-    deepTocBox=null, deepLastCh=null, deepTick=false;
+    deepTocBox=null, deepSheet=null, deepNav=null, deepLastCh=null, deepTick=false;
 function deepSpy(){
   deepTick=false;
   if(deepProg){
@@ -1174,21 +1206,38 @@ function deepSpy(){
       else if(t+h>box.scrollTop+box.clientHeight) box.scrollTop=t+h-box.clientHeight+8;
     }
   }
-  if(deepTop) deepTop.classList.toggle("is-on",deep.scrollTop>deep.clientHeight*.6);
+  const deepIn=deep.scrollTop>deep.clientHeight*.6;
+  if(deepTop) deepTop.classList.toggle("is-on",deepIn);
+  if(deepNav) deepNav.classList.toggle("is-on",deepIn);
 }
 /* 這兩個 listener 只掛一次。每開一本只換上面那三個參考——
    若放進 openDeep 裡重掛，反覆開關之後同一個 spy 會被呼叫好幾次。 */
 deep.addEventListener("scroll",()=>{ if(!deepTick){ deepTick=true; requestAnimationFrame(deepSpy); } });
+/* 這篇有七萬像素高，跨章的平滑捲動會慢到沒有意義，遠距離改成直接跳 */
+function deepGo(top){
+  deep.scrollTo({top,behavior:Math.abs(top-deep.scrollTop)>6000?"auto":"smooth"});
+}
+function openSheet(){
+  if(!deepSheet) return;
+  deepSheet.classList.add("is-on");
+  // 一打開就讓讀者看到自己在哪一章，不用自己找
+  const cur=deepSheet.querySelector("[data-sec].is-cur");
+  if(cur) deepSheet.scrollTop=Math.max(0,cur.offsetTop-deepSheet.clientHeight*.35);
+}
+function closeSheet(){ if(deepSheet) deepSheet.classList.remove("is-on"); }
 deep.addEventListener("click",e=>{
+  if(e.target.closest(".deep__nav")){ openSheet(); return; }
+  if(e.target.closest(".deep__sheet__x")){ closeSheet(); return; }
   const a=e.target.closest("[data-sec]");
   if(a){
     e.preventDefault();
+    closeSheet();
     const s=deepSecs[+a.dataset.sec];
-    if(s) deep.scrollTo({top:s.getBoundingClientRect().top-deep.getBoundingClientRect().top
-      +deep.scrollTop-24,behavior:"smooth"});
+    if(s) deepGo(s.getBoundingClientRect().top-deep.getBoundingClientRect().top+deep.scrollTop-24);
     return;
   }
-  if(e.target.closest(".deep__top")) deep.scrollTo({top:0,behavior:"smooth"});
+  if(e.target.closest(".deep__top")){ closeSheet(); deepGo(0); return; }
+  if(e.target===deepSheet) closeSheet();          // 點空白處關掉
 });
 function wireDeep(){
   deepSecs=[...deep.querySelectorAll(".deep__g")];
@@ -1197,6 +1246,8 @@ function wireDeep(){
   deepTop=deep.querySelector(".deep__top");
   deepProg=deep.querySelector(".deep__prog i");
   deepTocBox=deep.querySelector(".deep__toc");
+  deepSheet=deep.querySelector(".deep__sheet");
+  deepNav=deep.querySelector(".deep__nav");
   deepLastCh=null;
   deepSpy();
 }
