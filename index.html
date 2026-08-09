@@ -230,6 +230,9 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .deep-link:hover{opacity:.72}
 
 .deep{position:fixed;inset:0;z-index:78;background:var(--ink);overflow-y:auto;
+  /* 欄寬要跟著內文字級走。先前欄寬寫死 600px、字級卻是 clamp，
+     在 1280px 筆電上字級縮到 14.5px，一行就變成 41 字（目標 35）。 */
+  --prose:clamp(14.5px,1.02vw,17px);
   visibility:hidden;opacity:0}
 .deep.is-on{visibility:visible;opacity:1}
 /* 深讀頁是長文，排版規則跟書櫃其他地方不一樣：
@@ -266,7 +269,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   letter-spacing:.05em;line-height:1.9;color:var(--dim)}
 
 /* ── 目錄 ── */
-.deep__body{display:grid;grid-template-columns:1fr min(600px,100%) 1fr;
+.deep__body{display:grid;grid-template-columns:1fr min(calc(var(--prose) * 35),100%) 1fr;
   column-gap:clamp(24px,3vw,56px);margin-top:clamp(38px,6.5vh,78px)}
 .deep__col{grid-column:2;min-width:0}
 /* 目錄是拿來「找」的，左對齊給眼睛一條穩定的軸；區塊本身仍貼著版心那側 */
@@ -322,8 +325,13 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .deep__prog i{display:block;height:100%;background:var(--red);
   transform:scaleX(0);transform-origin:0 50%;will-change:transform}
 /* 桌機有側邊固定目錄就不需要這兩個；反過來也是 */
-.deep__tocm{display:none;margin-top:clamp(26px,4vh,42px);padding:1.3em 0;
+.deep__tocm{display:none;margin-top:clamp(26px,4vh,42px);padding:1.1em 0;
   border-top:1px solid var(--faint);border-bottom:1px solid var(--faint)}
+.deep__tocm summary{list-style:none;cursor:pointer;font-family:var(--mono);font-size:10px;
+  letter-spacing:.22em;text-transform:uppercase;color:#C08A4E}
+.deep__tocm summary::-webkit-details-marker{display:none}
+.deep__tocm summary::after{content:" ▾";letter-spacing:0}
+.deep__tocm[open] summary::after{content:" ▴"}
 .deep__tocm ol{list-style:none;margin-top:1.1em}
 .deep__tocm li+li{margin-top:.8em}
 .deep__tocm a{display:flex;gap:1em;align-items:baseline;text-decoration:none;
@@ -383,7 +391,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .deep__sh{font-size:clamp(19px,1.9vw,26px);font-weight:600;line-height:1.4;
   padding-bottom:.5em;border-bottom:1px solid var(--faint)}
 /* 段首空兩格、段距收窄——像書，不像網頁。行高 1.95 是中文長文的甜蜜點 */
-.deep__p{margin-top:.55em;text-indent:2em;font-size:clamp(14.5px,1.02vw,17px);line-height:1.95;
+.deep__p{margin-top:.55em;text-indent:2em;font-size:var(--prose);line-height:1.95;
   color:rgba(242,236,224,.86)}
 .deep__sh+.deep__p,.deep__pages+.deep__p{margin-top:1.2em}
 .deep__q{margin:1.9em 0;padding-left:1.4em;border-left:2px solid #C08A4E}
@@ -399,7 +407,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .deep__mine{margin-top:clamp(48px,8vh,84px);border-top:1px solid var(--faint);padding-top:2em}
 .deep__mine h3{font-family:var(--mono);font-size:clamp(10px,.72vw,12px);letter-spacing:.22em;
   text-transform:uppercase;color:#C08A4E;font-weight:400}
-.deep__mine .body{margin-top:1.2em;font-size:clamp(14.5px,1.02vw,17px);line-height:2.05;
+.deep__mine .body{margin-top:1.2em;font-size:var(--prose);line-height:1.95;
   color:rgba(242,236,224,.88)}
 .deep__mine .empty{margin-top:1.2em;font-size:clamp(13px,.9vw,15px);line-height:1.9;color:var(--dim)}
 .deep__foot{margin-top:clamp(40px,6vh,70px);font-family:var(--mono);
@@ -648,7 +656,10 @@ if(DEEPS.length){
   li.innerHTML='<a class="card card--deep" href="#deep" data-dx="1">'
     +'<span class="card__name"><i>深讀筆記</i></span><span class="card__foot">'
     +'<span class="card__count">'+DEEPS.length+' 篇</span>'
-    +'<span class="card__rep">'+esc(clean(DEEPS[0].t))+'</span></span></a>';
+    // 卡片副標列書名，超過兩本就收尾用「等」，免得卡片被撐爆
+    +'<span class="card__rep">'
+      +esc(DEEPS.slice(0,2).map(b=>clean(b.t)).join('、')+(DEEPS.length>2?' 等':''))
+    +'</span></span></a>';
   track.appendChild(li);
   strip.insertAdjacentHTML("beforeend","<span>"+(++cardCount)+"</span>");
 }
@@ -1066,7 +1077,7 @@ function deepHTML(d,cover){
 
     let s='<section class="deep__ch"><div class="deep__chhead">'
       +'<span class="deep__chbig" aria-hidden="true">'+esc(c.label||(c.title||'').slice(0,1))+'</span>'
-      +'<p class="deep__chn">'+esc((c.label?c.label+'　·　':'')+(c.span||''))+'</p>'
+      +'<p class="deep__chn">'+esc([c.label,c.span].filter(Boolean).join('　·　'))+'</p>'
       +'<h2 class="deep__cht">'+esc(c.title||'')+'</h2></div>'
       +(epi?'<blockquote class="deep__epi"><p>'+esc(epi.v)+'</p><cite>'+cite(epi)+'</cite></blockquote>':'');
 
@@ -1113,7 +1124,10 @@ function deepHTML(d,cover){
     +'</dl>'
     +(d.source?'<p class="deep__source">'+esc(d.source)+'</p>':'')
     +'</div></header>'
-    +'<nav class="deep__tocm"><h4>目錄</h4><ol>'+mtoc.join('')+'</ol></nav>'
+    /* 手機目錄預設收起來：這本書 40 章，攤開等於在正文前面擋一整面牆。
+       收的是導航不是內文，跟「長文不要摺疊」不衝突。 */
+    +'<details class="deep__tocm"><summary>目錄　'+st.chs.length+' 章</summary>'
+    +'<ol>'+mtoc.join('')+'</ol></details>'
     +'<div class="deep__body">'
     +'<nav class="deep__toc"><h4>目錄</h4><ol>'+toc.join('')+'</ol></nav>'
     +'<div class="deep__col">'+body.join('');
@@ -1132,7 +1146,8 @@ function deepHTML(d,cover){
 }
 
 /* 目錄高亮與回頂部。捲動容器是 .deep 不是視窗，座標一律相對它算。 */
-let deepSecs=[], deepLinks=[], deepChaps=[], deepTop=null, deepProg=null, deepTick=false;
+let deepSecs=[], deepLinks=[], deepChaps=[], deepTop=null, deepProg=null,
+    deepTocBox=null, deepLastCh=null, deepTick=false;
 function deepSpy(){
   deepTick=false;
   if(deepProg){
@@ -1147,6 +1162,18 @@ function deepSpy(){
   // 章要一起標，側邊目錄靠它決定展開哪一章的小標
   const ch=deepSecs[cur].dataset.ch;
   deepChaps.forEach(el=>el.classList.toggle("is-cur",el.dataset.ch===ch));
+  /* 40 章的目錄比視窗高得多，換章時要把當前章捲進視野，
+     否則側邊欄會停在第 1 章而讀者已經在第 30 章。只在換章時動，
+     不然使用者自己捲目錄會一直被拉回去。 */
+  if(ch!==deepLastCh){
+    deepLastCh=ch;
+    const el=deepChaps.filter(e=>e.dataset.ch===ch)[0], box=deepTocBox;
+    if(el&&box&&box.scrollHeight>box.clientHeight+1){
+      const t=el.offsetTop, h=el.offsetHeight;
+      if(t<box.scrollTop) box.scrollTop=t-8;
+      else if(t+h>box.scrollTop+box.clientHeight) box.scrollTop=t+h-box.clientHeight+8;
+    }
+  }
   if(deepTop) deepTop.classList.toggle("is-on",deep.scrollTop>deep.clientHeight*.6);
 }
 /* 這兩個 listener 只掛一次。每開一本只換上面那三個參考——
@@ -1169,6 +1196,8 @@ function wireDeep(){
   deepChaps=[...deep.querySelectorAll(".deep__tc")];
   deepTop=deep.querySelector(".deep__top");
   deepProg=deep.querySelector(".deep__prog i");
+  deepTocBox=deep.querySelector(".deep__toc");
+  deepLastCh=null;
   deepSpy();
 }
 
