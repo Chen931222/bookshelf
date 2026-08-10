@@ -268,6 +268,26 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .deep__source{margin-top:1.5em;font-family:var(--mono);font-size:clamp(9.5px,.68vw,11.5px);
   letter-spacing:.05em;line-height:1.9;color:var(--dim)}
 
+/* ── Claude 導讀：AI 的觀點，掛名清楚，跟頁尾主人的「我的心得」分開 ──
+   金色＝站方裝置（跟目錄、頁碼同一族），不用紅色——紅色只留給原書自己的標記 */
+.deep__ai{max-width:min(calc(var(--prose) * 38),100%);margin:clamp(34px,5.5vh,60px) auto 0;
+  border:1px solid rgba(192,138,78,.4);padding:clamp(20px,3vh,32px) clamp(18px,2.6vw,32px)}
+.deep__ai>p{margin-top:1.1em;font-size:var(--prose);line-height:1.9;color:rgba(242,236,224,.85)}
+.deep__ai>p:first-of-type{margin-top:1.3em}
+.deep__ai h4{margin-top:1.9em;font-family:var(--mono);font-size:clamp(10px,.7vw,11.5px);
+  letter-spacing:.2em;text-transform:uppercase;color:#C08A4E;font-weight:400}
+.deep__ai ol{list-style:none;margin-top:1em}
+.deep__ai li+li{margin-top:1.1em}
+.deep__ai li a{display:block;text-decoration:none;color:rgba(242,236,224,.92);
+  font-size:clamp(14.5px,1.05vw,17px);font-weight:600;line-height:1.5}
+.deep__ai li a:hover{color:#E0A968}
+.deep__ai li a .no{font-family:var(--mono);font-weight:400;font-size:.82em;
+  color:#C08A4E;margin-right:.7em}
+.deep__ai li p{margin-top:.4em;font-size:clamp(12.5px,.92vw,14.5px);line-height:1.8;
+  color:rgba(242,236,224,.6)}
+.deep__ai .who{margin-top:1.9em;font-family:var(--mono);font-size:clamp(9.5px,.64vw,11px);
+  line-height:1.9;color:var(--dim)}
+
 /* ── 目錄 ── */
 .deep__body{display:grid;grid-template-columns:1fr min(calc(var(--prose) * 35),100%) 1fr;
   column-gap:clamp(24px,3vw,56px);margin-top:clamp(38px,6.5vh,78px)}
@@ -1086,14 +1106,35 @@ function deepStats(d){
     mins: Math.max(1,Math.round(chars/400))          // 中文細讀抓每分鐘 400 字
   };
 }
+/* Claude 的導讀。掛名要清楚——這是 AI 的觀點，不是主人的；
+   主人的話只住在頁尾「我的心得」。重點章節連結沿用 data-sec 跳章機制。 */
+function aiHTML(d,chFirst){
+  if(!d.claude) return '';
+  let h='<section class="deep__ai"><p class="deep__kicker">Claude 導讀</p>';
+  (d.claude.take||[]).forEach(t=>{ h+='<p>'+esc(t)+'</p>'; });
+  const ks=(d.claude.keys||[]).filter(k=>chFirst[k.t]);   // 對不上章名的直接不顯示，不出死連結
+  if(ks.length){
+    h+='<h4>我認為的重點章節</h4><ol>';
+    ks.forEach(k=>{
+      const c=chFirst[k.t];
+      h+='<li><a href="#" data-sec="'+c.gi+'">'
+        +(c.label?'<span class="no">'+esc(c.label)+'</span>':'')
+        +esc(k.t)+'</a><p>'+esc(k.why)+'</p></li>';
+    });
+    h+='</ol>';
+  }
+  return h+'<p class="who">這一段是 Claude 讀完整份筆記後寫的觀點與選章，供參考。'
+    +'書櫃主人自己的心得在頁面最底。</p></section>';
+}
 function deepHTML(d,cover){
   const st=deepStats(d), mins=st.mins, span=st.span;
   /* 兩層目錄：側邊固定的那份只列章名，捲到哪一章才把該章的小標展開。
      四萬多字如果把 45 個小標全攤出來，目錄自己就比一屏還高。 */
-  const toc=[], mtoc=[], body=[];
+  const toc=[], mtoc=[], body=[], chFirst={};
   let gi=0;
   st.chs.forEach((c,ci)=>{
     const first=gi, subs=[];
+    chFirst[c.title]={gi:first,label:c.label};
     const cite=b=>esc(d.titleShort||d.title)+(b.p?'　p.'+esc(b.p):'')
       +(b.kind?'　·　'+esc(b.kind):'');
     /* 章題詞：優先用原書自己的紅框標語。③ 和 ⑨ 兩章書上沒放紅框，
@@ -1153,6 +1194,7 @@ function deepHTML(d,cover){
     +'</dl>'
     +(d.source?'<p class="deep__source">'+esc(d.source)+'</p>':'')
     +'</div></header>'
+    +aiHTML(d,chFirst)
     /* 手機目錄預設收起來：這本書 40 章，攤開等於在正文前面擋一整面牆。
        收的是導航不是內文，跟「長文不要摺疊」不衝突。 */
     +'<details class="deep__tocm"><summary>目錄　'+st.chs.length+' 章</summary>'
