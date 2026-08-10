@@ -1103,7 +1103,9 @@ function deepHTML(d,cover){
       || qs.slice().sort((a,b)=>b.v.length-a.v.length)[0] || null;
 
     let s='<section class="deep__ch"><div class="deep__chhead">'
-      +'<span class="deep__chbig" aria-hidden="true">'+esc(c.label||(c.title||'').slice(0,1))+'</span>'
+      /* 這個大字位代表的是章號。沒讀到章號就留空——退而取章名第一個字會變成
+         連續好幾個「如」，〈結語〉還會變成一個「〈」，那不是資訊是雜訊。 */
+      +(c.label?'<span class="deep__chbig" aria-hidden="true">'+esc(c.label)+'</span>':'')
       +'<p class="deep__chn">'+esc([c.label,c.span].filter(Boolean).join('　·　'))+'</p>'
       +'<h2 class="deep__cht">'+esc(c.title||'')+'</h2></div>'
       +(epi?'<blockquote class="deep__epi"><p>'+esc(epi.v)+'</p><cite>'+cite(epi)+'</cite></blockquote>':'');
