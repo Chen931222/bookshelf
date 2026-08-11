@@ -399,6 +399,75 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 @media (min-width:1080px){.deep__top,.deep__nav,.deep__sheet{display:none}}
 
 /* ── 深讀索引：首頁那張金色橫幅點進來的地方，壓在深讀內文底下一層 ── */
+/* ---------- 臨場速查：情境卡 ---------- */
+.qk{position:fixed;inset:0;z-index:77;background:var(--ink);overflow-y:auto;
+  visibility:hidden;opacity:0}
+.qk.is-on{visibility:visible;opacity:1}
+.qk__inner{max-width:min(760px,92vw);margin:0 auto;
+  padding:clamp(40px,8vh,90px) 0 clamp(80px,14vh,140px)}
+.qk__kicker{font-family:var(--mono);font-size:clamp(10px,.72vw,12px);letter-spacing:.24em;
+  text-transform:uppercase;color:#C08A4E}
+.qk__h{font-size:clamp(30px,4.6vw,54px);font-weight:600;line-height:1.1;margin-top:.24em}
+.qk__sub{max-width:32em;margin-top:1em;font-size:clamp(13px,.95vw,15.5px);line-height:1.9;
+  color:rgba(242,236,224,.66)}
+/* 搜尋框吸在頂端：翻到第 20 張想換個說法搜，不用捲回去 */
+.qk__bar{position:sticky;top:0;z-index:2;margin-top:clamp(22px,3.5vh,36px);
+  padding:14px 0;background:var(--ink)}
+.qk__in{width:100%;background:transparent;border:1px solid var(--faint);color:var(--paper);
+  font-family:var(--serif);font-size:clamp(15px,1.1vw,18px);padding:.85em 1em;outline:none}
+.qk__in:focus{border-color:#C08A4E}
+.qk__in::placeholder{color:rgba(242,236,224,.3)}
+.qk__chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.qk__chips button{background:transparent;border:1px solid var(--faint);color:rgba(242,236,224,.62);
+  font-family:var(--serif);font-size:clamp(11.5px,.85vw,13.5px);padding:.42em .85em;cursor:pointer;
+  transition:border-color .2s,color .2s}
+.qk__chips button:hover{color:var(--paper);border-color:rgba(242,236,224,.4)}
+.qk__chips button.is-on{color:#C08A4E;border-color:#C08A4E}
+.qk__count{margin-top:1.6em;font-family:var(--mono);font-size:clamp(10px,.7vw,11.5px);
+  letter-spacing:.14em;color:var(--dim)}
+
+.qk__card{margin-top:clamp(20px,2.8vh,30px);border:1px solid var(--faint);
+  padding:clamp(20px,3vh,30px) clamp(18px,2.6vw,32px)}
+.qk__topic{display:inline-block;font-family:var(--mono);font-size:clamp(9.5px,.66vw,11px);
+  letter-spacing:.16em;color:#C08A4E;border:1px solid rgba(192,138,78,.45);padding:.28em .7em}
+.qk__one{margin-top:1em;font-size:clamp(17px,1.5vw,24px);font-weight:600;line-height:1.55}
+.qk__sit{margin-top:1em;display:flex;flex-wrap:wrap;gap:6px 10px}
+.qk__sit span{font-size:clamp(11.5px,.86vw,13.5px);line-height:1.6;color:rgba(242,236,224,.44)}
+.qk__sit span::before{content:"／";margin-right:10px;color:rgba(242,236,224,.2)}
+.qk__sit span:first-child::before{content:"";margin:0}
+.qk__lab{margin-top:1.7em;font-family:var(--mono);font-size:clamp(9.5px,.66vw,11px);
+  letter-spacing:.2em;color:var(--dim)}
+/* 可以直接講的句子＝這個 App 最值錢的東西，給它最強的視覺 */
+.qk__say{margin-top:.7em;border-left:2px solid var(--red);padding-left:1.1em}
+.qk__say p{font-size:clamp(15px,1.15vw,19px);line-height:1.75;color:rgba(242,236,224,.96)}
+.qk__say p+p{margin-top:.7em}
+.qk__why{margin-top:.7em;font-size:clamp(13.5px,.98vw,16px);line-height:1.95;
+  color:rgba(242,236,224,.78)}
+.qk__caution{margin-top:1.4em;padding:.9em 1em;border:1px solid rgba(190,80,96,.32);
+  font-size:clamp(12.5px,.9vw,14.5px);line-height:1.8;color:rgba(242,236,224,.66)}
+.qk__caution b{color:var(--red);font-weight:400;font-family:var(--mono);font-size:.9em;
+  letter-spacing:.1em;margin-right:.6em}
+.qk__mine{margin-top:1.4em}
+.qk__mine textarea{width:100%;min-height:3.4em;background:rgba(242,236,224,.03);
+  border:1px solid var(--faint);color:var(--paper);font-family:var(--serif);
+  font-size:clamp(13px,.95vw,15px);line-height:1.8;padding:.8em 1em;outline:none;resize:vertical}
+.qk__mine textarea:focus{border-color:#C08A4E}
+.qk__mine .hint{margin-top:.5em;font-family:var(--mono);font-size:clamp(9px,.62vw,10.5px);
+  letter-spacing:.08em;color:rgba(242,236,224,.3)}
+.qk__src{margin-top:1.4em;padding-top:1em;border-top:1px solid var(--faint)}
+.qk__src a{font-family:var(--mono);font-size:clamp(10px,.7vw,11.5px);letter-spacing:.08em;
+  color:var(--dim);text-decoration:none}
+.qk__src a:hover{color:#C08A4E}
+.qk__none{margin-top:2.4em;font-size:clamp(14px,1vw,16px);line-height:2;color:var(--dim)}
+.qk__more{display:block;margin:clamp(26px,4vh,44px) auto 0;background:transparent;
+  border:1px solid var(--faint);color:rgba(242,236,224,.66);font-family:var(--mono);
+  font-size:clamp(10.5px,.74vw,12px);letter-spacing:.16em;padding:.85em 2em;cursor:pointer}
+.qk__more:hover{color:#C08A4E;border-color:#C08A4E}
+.card--qk{background:#12100C;border:1px solid rgba(242,236,224,.28);filter:none}
+.card--qk::before,.card--qk::after{background:rgba(242,236,224,.22)}
+.card--qk .card__name i,.card--qk .card__count{color:var(--paper)}
+.card--qk:hover,.card--qk:focus-visible{filter:none;border-color:rgba(242,236,224,.6)}
+
 .dx{position:fixed;inset:0;z-index:77;background:var(--ink);overflow-y:auto;
   visibility:hidden;opacity:0}
 .dx.is-on{visibility:visible;opacity:1}
@@ -645,6 +714,10 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 <button class="cat__close" id="deepClose" hidden style="z-index:80">Close</button>
 
 <!-- 深讀筆記索引 -->
+<!-- 臨場速查：情境卡，資料在 cards.json，點了才載 -->
+<section class="qk" id="qk" aria-label="臨場速查"><div class="qk__inner" id="qkInner"></div></section>
+<button class="cat__close" id="qkClose" hidden style="z-index:79">Close</button>
+
 <section class="dx" id="dx" aria-label="深讀筆記"><div class="dx__inner" id="dxInner"></div></section>
 <!-- z79：要壓過索引層（77）才看得到，又要讓深讀內文的 Close（80）在它之上 -->
 <button class="cat__close" id="dxClose" hidden style="z-index:79">Close</button>
@@ -703,6 +776,12 @@ if(DEEPS.length){
       +esc(DEEPS.slice(0,2).map(b=>clean(b.t)).join('、')+(DEEPS.length>2?' 等':''))
     +'</span></span></a>');
 }
+/* 臨場速查排第二張，緊跟深讀筆記——它就是深讀筆記萃取出來的東西 */
+addCell('<a class="card card--qk" href="#qk" data-qk="1">'
+  +'<span class="card__name"><i>臨場速查</i></span><span class="card__foot">'
+  +'<span class="card__count">情境卡</span>'
+  +'<span class="card__rep">當下接不上話，事後回來查怎麼講</span></span></a>');
+
 HOMECATS.forEach(c=>{
   const books=byCat(c.key), reading=books.filter(b=>b.r).length;
   addCell('<a class="card" href="#'+c.key+'" style="--c:'+c.color+'" data-key="'+c.key+'">'
@@ -1022,7 +1101,9 @@ async function close(){
 }
 track.addEventListener("click",e=>{
   const card=e.target.closest(".card"); if(!card) return; e.preventDefault();
-  if(card.dataset.dx) openDX(); else open(card.dataset.key);
+  if(card.dataset.qk) openQK();
+  else if(card.dataset.dx) openDX();
+  else open(card.dataset.key);
 });
 $("miscLink").addEventListener("click",e=>{e.preventDefault();open("misc");});
 $("catClose").addEventListener("click",close);
@@ -1032,6 +1113,7 @@ addEventListener("keydown",e=>{
   if(deepSheet&&deepSheet.classList.contains("is-on")) closeSheet();
   else if($("deep").classList.contains("is-on")) closeDeep();
   else if(dx.classList.contains("is-on")) closeDX();
+  else if(qk.classList.contains("is-on")) closeQK();
   else if($("ask").classList.contains("is-on")) closeAsk();
   else if(focus.classList.contains("is-on")) closeFocus();
   else if(listview.classList.contains("is-on")) closeList();
@@ -1069,11 +1151,12 @@ $("guestClose").addEventListener("click",closeGuest);
 /* ---------- 深讀筆記 ---------- */
 const deep=$("deep");
 const deepCache={};
-async function openDeep(id){
+async function openDeep(id,jumpCh){
   deep.innerHTML='<div class="deep__inner"><p class="deep__kicker">Loading</p></div>';
   /* 深讀的 Close（z80）跟索引的 Close（z71）在同一個座標，
      留著兩顆疊在一起沒必要，開內文時先把下層那顆收起來 */
-  deep.classList.add("is-on"); $("deepClose").hidden=false; $("dxClose").hidden=true;
+  deep.classList.add("is-on"); $("deepClose").hidden=false;
+  $("dxClose").hidden=true; $("qkClose").hidden=true;
   deep.scrollTop=0;
   try{
     if(!deepCache[id]){
@@ -1086,6 +1169,12 @@ async function openDeep(id){
     deep.innerHTML=deepHTML(deepCache[id],b&&b.cover);
     deep.scrollTop=0;
     wireDeep();
+    // 從速查卡的出處連結進來的，直接落在那一章，不要讓人自己找
+    if(jumpCh){
+      const t=[...deep.querySelectorAll(".deep__cht")].find(e=>e.textContent===jumpCh);
+      const g=t&&t.closest(".deep__ch").querySelector(".deep__g");
+      if(g){ deep.scrollTop=g.getBoundingClientRect().top-deep.getBoundingClientRect().top+deep.scrollTop-24; deepSpy(); }
+    }
   }catch(e){
     deep.innerHTML='<div class="deep__inner"><p class="deep__kicker">讀不到</p>'
       +'<p class="deep__p">'+esc(e.message)+'</p></div>';
@@ -1095,6 +1184,7 @@ function closeDeep(){
   closeSheet();
   deep.classList.remove("is-on"); $("deepClose").hidden=true;
   if(dx.classList.contains("is-on")) $("dxClose").hidden=false;   // 從索引進來的，退回索引
+  else if(qk.classList.contains("is-on")) $("qkClose").hidden=false; // 從速查卡進來的，退回速查
 }
 /* 索引頁和內頁都要顯示這組數字，算一次就好 */
 function deepStats(d){
@@ -1300,6 +1390,155 @@ function wireDeep(){
 }
 
 /* ---------- 深讀索引 ---------- */
+/* ---------- 臨場速查 ----------
+   完全不呼叫 AI：卡片與「你會怎麼想到它」的說法都在建置時就寫好了，
+   查詢只是本地的字串比對。離線可用、零延遲、不外送任何東西。 */
+const qk=$("qk"), qkInner=$("qkInner"), QKC="#8B857A";
+let QK=null, qkQuery="", qkTopic="", qkShow=8;
+
+// 中文沒有空白分詞，用二元組比對；「不知道」「什麼」這種到處都有的詞要靠 IDF 壓下去
+function qkGrams(s){
+  const t=String(s).toLowerCase().replace(/[\s　，、。？！：；「」『』（）()~!?.,]/g,"");
+  const o=[]; for(let i=0;i<t.length-1;i++) o.push(t.slice(i,i+2));
+  return o;
+}
+function qkIndex(cards){
+  const df={};
+  const docs=cards.map(c=>{
+    const sit=new Set(c.sit.flatMap(qkGrams));
+    const rest=new Set(qkGrams(c.one+c.topic+c.why+(c.say||[]).join("")));
+    new Set([...sit,...rest]).forEach(g=>df[g]=(df[g]||0)+1);
+    return {c,sit,rest};
+  });
+  const N=cards.length||1;
+  return {docs, idf:g=>Math.log(1+N/(1+(df[g]||0)))};
+}
+function qkSearch(q){
+  if(!QK) return [];
+  let pool=QK.docs;
+  if(qkTopic) pool=pool.filter(d=>d.c.topic===qkTopic);
+  if(!q.trim()) return pool.map(d=>d.c);
+  const gs=[...new Set(qkGrams(q))];
+  if(!gs.length) return pool.map(d=>d.c);
+  return pool.map(d=>{
+    let s=0;
+    gs.forEach(g=>{
+      const w=QK.idf(g);
+      if(d.sit.has(g)) s+=w*2.2;        // 情境說法命中最值錢
+      else if(d.rest.has(g)) s+=w;
+    });
+    if(q.includes(d.c.topic)) s+=3;
+    return {c:d.c,s};
+  }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s)
+    // 分數 >0 幾乎全中（隨便一個字都有人用），只留跟第一名同一個量級的，
+    // 否則「找到 303 張」這個數字是在騙人
+    .filter((x,_,arr)=>x.s>=arr[0].s*0.45)
+    .slice(0,40).map(x=>x.c);
+}
+const MYKEY=id=>"shelf.my."+id;
+function qkCardHTML(c){
+  let h='<article class="qk__card" data-card="'+esc(c.id)+'">'
+    +'<span class="qk__topic">'+esc(c.topic)+'</span>'
+    +'<p class="qk__one">'+esc(c.one)+'</p>'
+    +'<p class="qk__sit">'+c.sit.map(s=>'<span>'+esc(s)+'</span>').join("")+'</p>';
+  if(c.say&&c.say.length){
+    h+='<p class="qk__lab">可以這樣說</p><div class="qk__say">'
+      +c.say.map(s=>'<p>'+esc(s)+'</p>').join("")+'</div>';
+  }
+  if(c.why) h+='<p class="qk__lab">為什麼有效</p><p class="qk__why">'+esc(c.why)+'</p>';
+  if(c.caution) h+='<p class="qk__caution"><b>小心</b>'+esc(c.caution)+'</p>';
+  const mine=(()=>{ try{ return localStorage.getItem(MYKEY(c.id))||""; }catch(_){ return ""; } })();
+  h+='<div class="qk__mine">'
+    +'<p class="qk__lab">我當時可以怎麼說</p>'
+    +'<textarea data-my="'+esc(c.id)+'" rows="2" placeholder="寫下你自己的版本⋯⋯">'+esc(mine)+'</textarea>'
+    +'<p class="hint">只存在這台裝置，不會上傳、不會進版控</p></div>';
+  h+='<p class="qk__src"><a href="#" data-open-deep="'+esc(c.src.b)+'" data-ch="'+esc(c.src.ch)+'">'
+    +esc('《'+c.src.book+'》'+(c.src.label?c.src.label+' ':'')+c.src.ch+(c.src.span?'　'+c.src.span:''))
+    +' →</a></p></article>';
+  return h;
+}
+function qkRender(){
+  const res=qkSearch(qkQuery);
+  const chips=QK.topics.map(t=>'<button type="button" data-topic="'+esc(t)+'"'
+    +(qkTopic===t?' class="is-on"':'')+'>'+esc(t)+'</button>').join("");
+  let h='<p class="qk__kicker">Quick reference</p><h1 class="qk__h">臨場速查</h1>'
+    +'<p class="qk__sub">當下接不上話、事後才想到該怎麼講——用你自己的說法搜，'
+    +'不必記得書裡的術語。全部離線運作，不會送出任何東西。</p>'
+    +'<div class="qk__bar">'
+    +'<input class="qk__in" id="qkIn" type="search" autocomplete="off" '
+    +'placeholder="例如：對方一直抱怨工作沒意義" value="'+esc(qkQuery)+'">'
+    +'<div class="qk__chips" id="qkChips">'
+    +'<button type="button" data-topic=""'+(qkTopic?'':' class="is-on"')+'>全部</button>'+chips
+    +'</div></div>';
+  h+='<p class="qk__count">'+res.length+' 張卡'
+    +(qkTopic?'　·　'+esc(qkTopic):'')+(qkQuery.trim()?'　·　依相關度排序':'')+'</p>';
+  if(!res.length){
+    h+='<p class="qk__none">這裡沒有。換個說法試試，或先看看上面的主題——'
+      +'書櫃裡目前只有四本深讀筆記，涵蓋得到的情境有限。</p>';
+  }else{
+    h+=res.slice(0,qkShow).map(qkCardHTML).join("");
+    if(res.length>qkShow) h+='<button class="qk__more" type="button" id="qkMore">再看 '
+      +Math.min(12,res.length-qkShow)+' 張（還有 '+(res.length-qkShow)+' 張）</button>';
+  }
+  qkInner.innerHTML=h;
+}
+async function openQK(){
+  if(busy) return;
+  setBusy(true); lastFocus=document.activeElement;
+  await sweep(QKC,0,1,1100);
+  if(!QK){
+    try{
+      const d=await fetch("cards.json",{cache:"no-cache"}).then(r=>{
+        if(!r.ok) throw new Error("cards.json "+r.status); return r.json();
+      });
+      QK=Object.assign(qkIndex(d.cards),{topics:d.topics});
+    }catch(e){
+      qkInner.innerHTML='<p class="qk__kicker">讀不到</p><p class="qk__none">'+esc(e.message)+'</p>';
+    }
+  }
+  if(QK) qkRender();
+  qk.classList.add("is-on"); $("qkClose").hidden=false; qk.scrollTop=0;
+  $("qkClose").focus();
+  await sweep(QKC,1,0,1100); clearWipe(); setBusy(false);
+}
+async function closeQK(){
+  if(busy) return;
+  setBusy(true);
+  await sweep(QKC,0,1,1100);
+  qk.classList.remove("is-on"); $("qkClose").hidden=true;
+  if(lastFocus) lastFocus.focus();
+  await sweep(QKC,1,0,1100); clearWipe(); setBusy(false);
+}
+$("qkClose").addEventListener("click",closeQK);
+/* 輸入時重畫整塊會讓輸入框失焦，所以只重畫結果、輸入框留在原地 */
+let qkTick=null;
+qk.addEventListener("input",e=>{
+  if(e.target.id==="qkIn"){
+    clearTimeout(qkTick);
+    qkTick=setTimeout(()=>{
+      qkQuery=e.target.value; qkShow=8;
+      const pos=e.target.selectionStart;
+      qkRender();
+      const el=$("qkIn"); if(el){ el.focus(); try{el.setSelectionRange(pos,pos);}catch(_){} }
+    },160);
+    return;
+  }
+  if(e.target.dataset.my!==undefined){
+    try{
+      const v=e.target.value.trim();
+      if(v) localStorage.setItem(MYKEY(e.target.dataset.my),v);
+      else localStorage.removeItem(MYKEY(e.target.dataset.my));
+    }catch(_){}
+  }
+});
+qk.addEventListener("click",e=>{
+  const chip=e.target.closest("[data-topic]");
+  if(chip){ qkTopic=chip.dataset.topic; qkShow=8; qkRender(); qk.scrollTop=0; return; }
+  if(e.target.id==="qkMore"){ qkShow+=12; qkRender(); return; }
+  const src=e.target.closest("[data-open-deep]");
+  if(src){ e.preventDefault(); openDeep(src.dataset.openDeep, src.dataset.ch); }
+});
+
 const dx=$("dx"), dxInner=$("dxInner"), DXC="#C08A4E";
 function dxHTML(metas){
   let h='<p class="dx__kicker">Deep reads</p><h1 class="dx__h">深讀筆記</h1>'
