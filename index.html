@@ -1474,8 +1474,16 @@ function qkRender(){
   h+='<p class="qk__count">'+res.length+' 張卡'
     +(qkTopic?'　·　'+esc(qkTopic):'')+(qkQuery.trim()?'　·　依相關度排序':'')+'</p>';
   if(!res.length){
-    h+='<p class="qk__none">這裡沒有。換個說法試試，或先看看上面的主題——'
-      +'書櫃裡目前只有四本深讀筆記，涵蓋得到的情境有限。</p>';
+    /* 主題篩選開著的時候查不到，多半不是真的沒有，是被主題擋掉了。
+       直接告訴他全部主題裡有幾張，並給一鍵取消。 */
+    const all=qkTopic?(()=>{const t=qkTopic;qkTopic="";const n=qkSearch(qkQuery).length;qkTopic=t;return n;})():0;
+    h+='<p class="qk__none">';
+    if(qkTopic&&all) h+='「'+esc(qkTopic)+'」裡沒有，但其他主題有 '+all+' 張。';
+    else h+='這裡沒有。換個說法試試，或先看看上面的主題——'
+      +'書櫃裡目前只有五本深讀筆記，涵蓋得到的情境有限。';
+    h+='</p>';
+    // 取消篩選之後還是 0 筆的話，這顆按鈕按了也是白按，不要給
+    if(qkTopic&&all) h+='<button class="qk__more" type="button" data-topic="">搜尋全部主題（'+all+' 張）</button>';
   }else{
     h+=res.slice(0,qkShow).map(qkCardHTML).join("");
     if(res.length>qkShow) h+='<button class="qk__more" type="button" id="qkMore">再看 '
@@ -1512,16 +1520,28 @@ async function closeQK(){
 }
 $("qkClose").addEventListener("click",closeQK);
 /* 輸入時重畫整塊會讓輸入框失焦，所以只重畫結果、輸入框留在原地 */
-let qkTick=null;
+let qkTick=null, qkComposing=false;
+function qkType(el){
+  clearTimeout(qkTick);
+  qkTick=setTimeout(()=>{
+    qkQuery=el.value; qkShow=8;
+    const pos=el.selectionStart;
+    qkRender();
+    const n=$("qkIn"); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){} }
+  },160);
+}
+/* 注音、拼音、日文這類輸入法在選字之前會不斷觸發 input，
+   當下的值是「ㄉㄚ」這種還沒組完的字根，拿去搜一定是 0 筆，
+   畫面會在打字過程中一直閃「查不到」。組完字再搜。 */
+qk.addEventListener("compositionstart",e=>{ if(e.target.id==="qkIn") qkComposing=true; });
+qk.addEventListener("compositionend",e=>{
+  if(e.target.id!=="qkIn") return;
+  qkComposing=false; qkType(e.target);
+});
 qk.addEventListener("input",e=>{
   if(e.target.id==="qkIn"){
-    clearTimeout(qkTick);
-    qkTick=setTimeout(()=>{
-      qkQuery=e.target.value; qkShow=8;
-      const pos=e.target.selectionStart;
-      qkRender();
-      const el=$("qkIn"); if(el){ el.focus(); try{el.setSelectionRange(pos,pos);}catch(_){} }
-    },160);
+    if(qkComposing||e.isComposing) return;   // 組字中，等 compositionend
+    qkType(e.target);
     return;
   }
   if(e.target.dataset.my!==undefined){
