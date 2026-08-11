@@ -680,34 +680,37 @@ const oriLabel = o => ({spine:"書背朝外",face:"封面朝外",flat:"平放"})
 /* ---------- 首頁 ---------- */
 const gallery=$("gallery"), track=$("track"), strip=$("strip"), wipe=$("wipe");
 const HOMECATS = CATS.filter(c=>!c.hidden);
-HOMECATS.forEach((c,i)=>{
-  const books=byCat(c.key), reading=books.filter(b=>b.r).length;
-  const li=document.createElement("li"); li.className="cell";
-  li.innerHTML='<a class="card" href="#'+c.key+'" style="--c:'+c.color+'" data-key="'+c.key+'">'
-    +'<span class="card__name"><i>'+c.name+'</i></span><span class="card__foot">'
-    +'<span class="card__count">'+books.length+' 冊</span>'
-    +'<span class="card__rep">'+c.rep+'</span>'
-    +(reading?'<span class="card__reading">正在讀 '+reading+'</span>':'')+'</span></a>';
-  track.appendChild(li);
-  strip.insertAdjacentHTML("beforeend","<span>"+(i+1)+"</span>");
-});
-
-/* 深讀筆記也在首頁佔一格。它不是分類，所以不走 data-key，
-   計數器與捲動比例都改用 cardCount，不能再拿 HOMECATS.length 當總數。 */
 const DEEPS = BOOKS.filter(b=>b.deep);
-let cardCount = HOMECATS.length;
-if(DEEPS.length){
+
+/* 計數器編號要跟畫面順序一致，所以一律經過這裡加格子，
+   不要各自數各自的（先前深讀卡另外算，換順序就會錯號）。 */
+let cardCount = 0;
+function addCell(html){
   const li=document.createElement("li"); li.className="cell";
-  li.innerHTML='<a class="card card--deep" href="#deep" data-dx="1">'
+  li.innerHTML=html;
+  track.appendChild(li);
+  strip.insertAdjacentHTML("beforeend","<span>"+(++cardCount)+"</span>");
+}
+
+/* 深讀筆記排第一張：這是主人自己最常進去的地方，
+   擺在最後每次都要先滑過六張分類卡。它不是分類，所以不走 data-key。 */
+if(DEEPS.length){
+  addCell('<a class="card card--deep" href="#deep" data-dx="1">'
     +'<span class="card__name"><i>深讀筆記</i></span><span class="card__foot">'
     +'<span class="card__count">'+DEEPS.length+' 篇</span>'
     // 卡片副標列書名，超過兩本就收尾用「等」，免得卡片被撐爆
     +'<span class="card__rep">'
       +esc(DEEPS.slice(0,2).map(b=>clean(b.t)).join('、')+(DEEPS.length>2?' 等':''))
-    +'</span></span></a>';
-  track.appendChild(li);
-  strip.insertAdjacentHTML("beforeend","<span>"+(++cardCount)+"</span>");
+    +'</span></span></a>');
 }
+HOMECATS.forEach(c=>{
+  const books=byCat(c.key), reading=books.filter(b=>b.r).length;
+  addCell('<a class="card" href="#'+c.key+'" style="--c:'+c.color+'" data-key="'+c.key+'">'
+    +'<span class="card__name"><i>'+c.name+'</i></span><span class="card__foot">'
+    +'<span class="card__count">'+books.length+' 冊</span>'
+    +'<span class="card__rep">'+c.rep+'</span>'
+    +(reading?'<span class="card__reading">正在讀 '+reading+'</span>':'')+'</span></a>');
+});
 $("total").textContent=cardCount;
 
 let gtarget=0, graf=null;
