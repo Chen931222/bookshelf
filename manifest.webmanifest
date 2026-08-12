@@ -1,0 +1,20 @@
+{
+  "name": "書櫃",
+  "short_name": "書櫃",
+  "description": "實體書櫃的索引與展覽，附深讀筆記與臨場速查",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#141310",
+  "theme_color": "#141310",
+  "lang": "zh-Hant",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>書櫃</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23141310'/%3E%3Crect x='8.5' y='5' width='15' height='22' rx='1.2' fill='%23F2ECE0'/%3E%3Crect x='8.5' y='5' width='3.4' height='22' fill='%23C08A4E'/%3E%3Cline x1='15' y1='9' x2='20.5' y2='9' stroke='%23141310' stroke-width='1.1'/%3E%3Cline x1='15' y1='12' x2='20.5' y2='12' stroke='%23141310' stroke-width='1.1'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#141310">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -459,6 +464,14 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   color:var(--dim);text-decoration:none}
 .qk__src a:hover{color:#C08A4E}
 .qk__none{margin-top:2.4em;font-size:clamp(14px,1vw,16px);line-height:2;color:var(--dim)}
+.qk__miss{margin-top:clamp(34px,5vh,60px);padding-top:1.6em;border-top:1px solid var(--faint)}
+.qk__misslist{display:flex;flex-wrap:wrap;gap:8px;margin-top:1em}
+.qk__misslist button{background:transparent;border:1px dashed rgba(242,236,224,.22);
+  color:rgba(242,236,224,.55);font-family:var(--serif);font-size:clamp(12px,.9vw,14px);
+  padding:.45em .9em;cursor:pointer}
+.qk__misslist button:hover{color:var(--paper);border-color:rgba(242,236,224,.45)}
+.qk__miss .hint{margin-top:1.1em;font-family:var(--mono);font-size:clamp(9.5px,.66vw,11px);
+  line-height:1.9;color:rgba(242,236,224,.32)}
 .qk__more{display:block;margin:clamp(26px,4vh,44px) auto 0;background:transparent;
   border:1px solid var(--faint);color:rgba(242,236,224,.66);font-family:var(--mono);
   font-size:clamp(10.5px,.74vw,12px);letter-spacing:.16em;padding:.85em 2em;cursor:pointer}
@@ -524,6 +537,18 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .deep__mine .body{margin-top:1.2em;font-size:var(--prose);line-height:1.95;
   color:rgba(242,236,224,.88)}
 .deep__mine .empty{margin-top:1.2em;font-size:clamp(13px,.9vw,15px);line-height:1.9;color:var(--dim)}
+/* 直接在頁面上寫。改 JSON、commit、push 這三步是心得一直空著的真正原因 */
+.deep__mine textarea{width:100%;min-height:8em;margin-top:1.2em;background:rgba(242,236,224,.03);
+  border:1px solid var(--faint);color:var(--paper);font-family:var(--serif);
+  font-size:var(--prose);line-height:1.95;padding:1em 1.1em;outline:none;resize:vertical}
+.deep__mine textarea:focus{border-color:#C08A4E}
+.deep__mine textarea::placeholder{color:rgba(242,236,224,.26)}
+.deep__mine__bar{display:flex;flex-wrap:wrap;align-items:center;gap:1.2em;margin-top:.8em;
+  font-family:var(--mono);font-size:clamp(9.5px,.66vw,11px);letter-spacing:.08em;color:var(--dim)}
+.deep__mine__bar button{background:transparent;border:1px solid var(--faint);color:rgba(242,236,224,.7);
+  font-family:var(--mono);font-size:inherit;letter-spacing:.14em;padding:.6em 1.2em;cursor:pointer}
+.deep__mine__bar button:hover{color:#C08A4E;border-color:#C08A4E}
+.deep__mine__bar .saved{color:#C08A4E}
 .deep__foot{margin-top:clamp(40px,6vh,70px);font-family:var(--mono);
   font-size:clamp(9.5px,.64vw,11px);line-height:2;color:rgba(242,236,224,.3)}
 
@@ -1168,8 +1193,16 @@ async function openDeep(id,jumpCh){
     const b=BOOKS.find(x=>x.id===id);
     deep.innerHTML=deepHTML(deepCache[id],b&&b.cover);
     deep.scrollTop=0;
+    /* 先把上次的位置讀出來，再 wireDeep。順序不能顛倒——
+       wireDeep 會呼叫 deepSpy，那一刻 scrollTop 是 0，會立刻把記錄覆寫成 0。
+       同理 wireDeep 期間先把 deepId 清掉，免得它寫到別本書的記錄上。 */
+    let at=0;
+    if(!jumpCh){ try{ at=+(localStorage.getItem("shelf.at."+id)||0); }catch(_){} }
+    deepId=null;
     wireDeep();
-    // 從速查卡的出處連結進來的，直接落在那一章，不要讓人自己找
+    deepId=id;
+    // 從速查卡指定跳章時不還原——那時要的是那一章，不是上次停下來的地方
+    if(at>400&&at<deep.scrollHeight-deep.clientHeight){ deep.scrollTop=at; deepSpy(); }
     if(jumpCh){
       const t=[...deep.querySelectorAll(".deep__cht")].find(e=>e.textContent===jumpCh);
       const g=t&&t.closest(".deep__ch").querySelector(".deep__g");
@@ -1296,11 +1329,19 @@ function deepHTML(d,cover){
     +'<div class="deep__body">'
     +'<nav class="deep__toc"><h4>目錄</h4><ol>'+toc.join('')+'</ol></nav>'
     +'<div class="deep__col">'+body.join('');
+  /* 心得直接寫在頁面上。d.note 是已經收進正式資料的版本，
+     localStorage 是還沒收進去的草稿——草稿優先顯示，免得剛打的字被蓋掉。 */
+  const draft=(()=>{ try{ return localStorage.getItem("shelf.note."+d.bookId)||""; }catch(_){ return ""; } })();
   h+='<div class="deep__mine"><h3>我的心得</h3>'
     +(d.note&&d.note.trim()
-      ? '<div class="body">'+esc(d.note).replace(/\n/g,'<br>')+'</div>'
-      : '<p class="empty">還沒寫。這一段留給我自己。</p>')
-    +'</div>';
+      ? '<div class="body">'+esc(d.note).replace(/\n/g,'<br>')+'</div>' : '')
+    +'<textarea data-note="'+esc(d.bookId)+'" rows="6" placeholder="'
+    +(d.note&&d.note.trim()?'想補充什麼就寫在這裡⋯⋯':'讀完想到什麼就寫在這裡。這一段是你的，不是我的。')
+    +'">'+esc(draft)+'</textarea>'
+    +'<div class="deep__mine__bar">'
+    +'<button type="button" data-copy-note="'+esc(d.bookId)+'">複製全文</button>'
+    +'<span data-note-hint="'+esc(d.bookId)+'">只存在這台裝置。寫好按複製，貼給我就收進正式資料。</span>'
+    +'</div></div>';
   // 措辭要對得起實情：重述段落裡確實留著原書的句子，不能說成「並非原文照錄」。
   h+='<p class="deep__foot">這是讀書筆記：內文為重述，其中保留原書的部分語句；獨立引文標示頁碼。'
     +'<br>著作權屬原作者與出版社所有。</p>'
@@ -1317,7 +1358,7 @@ function deepHTML(d,cover){
 
 /* 目錄高亮與回頂部。捲動容器是 .deep 不是視窗，座標一律相對它算。 */
 let deepSecs=[], deepLinks=[], deepChaps=[], deepTop=null, deepProg=null,
-    deepTocBox=null, deepSheet=null, deepNav=null, deepLastCh=null, deepTick=false;
+    deepTocBox=null, deepSheet=null, deepNav=null, deepLastCh=null, deepId=null, deepTick=false;
 function deepSpy(){
   deepTick=false;
   if(deepProg){
@@ -1347,6 +1388,8 @@ function deepSpy(){
   const deepIn=deep.scrollTop>deep.clientHeight*.6;
   if(deepTop) deepTop.classList.toggle("is-on",deepIn);
   if(deepNav) deepNav.classList.toggle("is-on",deepIn);
+  // 記住讀到哪。兩小時的長文關掉就歸零，是讀不完的主因
+  if(deepId){ try{ localStorage.setItem("shelf.at."+deepId,String(Math.round(deep.scrollTop))); }catch(_){} }
 }
 /* 這兩個 listener 只掛一次。每開一本只換上面那三個參考——
    若放進 openDeep 裡重掛，反覆開關之後同一個 spy 會被呼叫好幾次。 */
@@ -1375,7 +1418,35 @@ deep.addEventListener("click",e=>{
     return;
   }
   if(e.target.closest(".deep__top")){ closeSheet(); deepGo(0); return; }
+  const cp=e.target.closest("[data-copy-note]");
+  if(cp){
+    const id=cp.dataset.copyNote;
+    const ta=deep.querySelector('[data-note="'+id+'"]');
+    const hint=deep.querySelector('[data-note-hint="'+id+'"]');
+    if(ta&&ta.value.trim()){
+      navigator.clipboard.writeText(ta.value.trim()).then(()=>{
+        if(hint){ hint.textContent="已複製。貼給我就收進正式資料。"; hint.className="saved"; }
+      }).catch(()=>{ ta.select(); if(hint) hint.textContent="按 Ctrl+C 複製"; });
+    }else if(hint){ hint.textContent="還沒寫東西。"; }
+    return;
+  }
   if(e.target===deepSheet) closeSheet();          // 點空白處關掉
+});
+/* 打字即存。這裡不做防抖也沒關係——localStorage 寫入很便宜，
+   而「關掉分頁字就不見」的風險比那點效能重要得多。 */
+deep.addEventListener("input",e=>{
+  const id=e.target.dataset&&e.target.dataset.note;
+  if(!id) return;
+  try{
+    const v=e.target.value;
+    if(v.trim()) localStorage.setItem("shelf.note."+id,v);
+    else localStorage.removeItem("shelf.note."+id);
+  }catch(_){}
+  const hint=deep.querySelector('[data-note-hint="'+id+'"]');
+  if(hint&&hint.className!=="saved-typing"){
+    hint.textContent="已存在這台裝置。寫好按複製，貼給我就收進正式資料。";
+    hint.className="saved-typing";
+  }
 });
 function wireDeep(){
   deepSecs=[...deep.querySelectorAll(".deep__g")];
@@ -1473,6 +1544,16 @@ function qkRender(){
     +'</div></div>';
   h+='<p class="qk__count">'+res.length+' 張卡'
     +(qkTopic?'　·　'+esc(qkTopic):'')+(qkQuery.trim()?'　·　依相關度排序':'')+'</p>';
+  /* 搜了卻沒東西的字，記在本機。那份清單就是「書櫃還缺什麼」的需求清單，
+     比我猜下一本該拍哪本書準得多。只留最近 60 筆，不上傳。 */
+  if(!res.length&&qkQuery.trim()&&!qkTopic){
+    try{
+      const k="shelf.miss";
+      const arr=JSON.parse(localStorage.getItem(k)||"[]").filter(x=>x!==qkQuery.trim());
+      arr.unshift(qkQuery.trim());
+      localStorage.setItem(k,JSON.stringify(arr.slice(0,60)));
+    }catch(_){}
+  }
   if(!res.length){
     /* 主題篩選開著的時候查不到，多半不是真的沒有，是被主題擋掉了。
        直接告訴他全部主題裡有幾張，並給一鍵取消。 */
@@ -1484,6 +1565,14 @@ function qkRender(){
     h+='</p>';
     // 取消篩選之後還是 0 筆的話，這顆按鈕按了也是白按，不要給
     if(qkTopic&&all) h+='<button class="qk__more" type="button" data-topic="">搜尋全部主題（'+all+' 張）</button>';
+  }
+  if(!qkQuery.trim()&&!qkTopic){
+    let miss=[]; try{ miss=JSON.parse(localStorage.getItem("shelf.miss")||"[]"); }catch(_){}
+    if(miss.length){
+      h+='<div class="qk__miss"><p class="qk__lab">你搜過但這裡沒有的</p><div class="qk__misslist">'
+        +miss.slice(0,12).map(m=>'<button type="button" data-miss="'+esc(m)+'">'+esc(m)+'</button>').join('')
+        +'</div><p class="hint">這就是書櫃還缺的東西。下一本挑書時可以照著這份清單找。</p></div>';
+    }
   }else{
     h+=res.slice(0,qkShow).map(qkCardHTML).join("");
     if(res.length>qkShow) h+='<button class="qk__more" type="button" id="qkMore">再看 '
@@ -1556,6 +1645,9 @@ qk.addEventListener("click",e=>{
   const chip=e.target.closest("[data-topic]");
   if(chip){ qkTopic=chip.dataset.topic; qkShow=8; qkRender(); qk.scrollTop=0; return; }
   if(e.target.id==="qkMore"){ qkShow+=12; qkRender(); return; }
+  const miss=e.target.closest("[data-miss]");
+  if(miss){ qkQuery=miss.dataset.miss; qkShow=8; qkRender();
+    const el=$("qkIn"); if(el) el.value=qkQuery; return; }
   const src=e.target.closest("[data-open-deep]");
   if(src){ e.preventDefault(); openDeep(src.dataset.openDeep, src.dataset.ch); }
 });
@@ -1677,6 +1769,15 @@ window.__shelf = { BOOKS, CATS };   // 除錯用
   document.body.insertAdjacentHTML('beforeend',
     '<p style="position:fixed;inset:auto 0 0 0;padding:1em;text-align:center;font-family:var(--mono);font-size:12px;color:var(--dim)">書單載入失敗：' + err.message + '</p>');
 });
+</script>
+<script>
+/* 離線快取。註冊放在 load 之後，不跟首屏搶頻寬；
+   file:// 開啟時沒有 serviceWorker，用 try 包起來免得整頁掛掉。 */
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
 </script>
 </body>
 </html>

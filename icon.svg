@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- maskable：安全區是中央 80%，所以書本畫小一點、四周留給系統裁切 -->
+  <rect width="512" height="512" fill="#141310"/>
+  <g>
+    <rect x="168" y="128" width="176" height="256" rx="10" fill="#F2ECE0"/>
+    <rect x="168" y="128" width="40" height="256" rx="10" fill="#C08A4E"/>
+    <rect x="200" y="128" width="8" height="256" fill="#C08A4E"/>
+    <line x1="240" y1="180" x2="312" y2="180" stroke="#141310" stroke-width="13" stroke-linecap="round"/>
+    <line x1="240" y1="224" x2="312" y2="224" stroke="#141310" stroke-width="13" stroke-linecap="round"/>
+    <line x1="240" y1="268" x2="288" y2="268" stroke="#141310" stroke-width="13" stroke-linecap="round"/>
+  </g>
+</svg>

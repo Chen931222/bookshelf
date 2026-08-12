@@ -1,0 +1,821 @@
+[
+ {
+  "name": "money-051-00",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "你的內涵與能力，不能輸在不會表達",
+  "label": "01",
+  "span": "p.16–47",
+  "chars": 9551
+ },
+ {
+  "name": "money-051-01",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "先閱人，然後說到對方心裡去",
+  "label": "02",
+  "span": "p.53–65",
+  "chars": 3809
+ },
+ {
+  "name": "money-051-02",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "好的開場，是成功的一半以上",
+  "label": "03",
+  "span": "p.74–105",
+  "chars": 10240
+ },
+ {
+  "name": "money-051-03",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "話說三分，點到為止更有分量",
+  "label": "04",
+  "span": "p.111–130",
+  "chars": 5797
+ },
+ {
+  "name": "money-051-04",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "陌生變朋友的絕招",
+  "label": "05",
+  "span": "p.132–154",
+  "chars": 7898
+ },
+ {
+  "name": "money-051-05",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "化解尷尬和冷場",
+  "label": "06",
+  "span": "p.156–179",
+  "chars": 8583
+ },
+ {
+  "name": "money-051-06",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "說話的分寸",
+  "label": "07",
+  "span": "p.182–205",
+  "chars": 10372
+ },
+ {
+  "name": "money-051-07",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "公司裡，怎麼說話的？",
+  "label": "08",
+  "span": "p.208–238",
+  "chars": 9644
+ },
+ {
+  "name": "money-051-08",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "用對心機，巧妙改變別人的潛意識",
+  "label": "09",
+  "span": "p.240–266",
+  "chars": 12032
+ },
+ {
+  "name": "money-051-09",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "不著痕跡的抓住表現機會",
+  "label": "10",
+  "span": "p.268–288",
+  "chars": 8361
+ },
+ {
+  "name": "money-051-10",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "99%的人不懂如何和家人表達",
+  "label": "11",
+  "span": "p.290–306",
+  "chars": 6796
+ },
+ {
+  "name": "money-051-11",
+  "book": "99%的人輸在不會表達",
+  "bookId": "money-051",
+  "ch": "談完戀愛，談什麼",
+  "label": "12",
+  "span": "p.314–334",
+  "chars": 6256
+ },
+ {
+  "name": "money-066-00",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "成為「套餐組合型」人才",
+  "label": "01",
+  "span": "p.16–18",
+  "chars": 2179
+ },
+ {
+  "name": "money-066-01",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "副業",
+  "label": "02",
+  "span": "p.21–22",
+  "chars": 2316
+ },
+ {
+  "name": "money-066-02",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "主管爛，怎麼辦？",
+  "label": "03",
+  "span": "p.24–27",
+  "chars": 2704
+ },
+ {
+  "name": "money-066-03",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "做自己的 CEO",
+  "label": "04",
+  "span": "p.29–32",
+  "chars": 3805
+ },
+ {
+  "name": "money-066-04",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "把興趣帶入工作",
+  "label": "06",
+  "span": "p.37–40",
+  "chars": 2734
+ },
+ {
+  "name": "money-066-05",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "橘色",
+  "label": "08",
+  "span": "p.45–46",
+  "chars": 2021
+ },
+ {
+  "name": "money-066-06",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "增強網路存在感",
+  "label": "09",
+  "span": "p.50–52",
+  "chars": 3398
+ },
+ {
+  "name": "money-066-07",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "用同一張大頭照",
+  "label": "10",
+  "span": "p.53–56",
+  "chars": 2878
+ },
+ {
+  "name": "money-066-08",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "你是自己的出版商",
+  "label": "11",
+  "span": "p.57–60",
+  "chars": 3013
+ },
+ {
+  "name": "money-066-09",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "和常去的餐廳變熟識",
+  "label": "13",
+  "span": "p.71–72",
+  "chars": 2594
+ },
+ {
+  "name": "money-066-10",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "人的舌頭，充滿了記憶",
+  "label": "14",
+  "span": "p.74–78",
+  "chars": 3574
+ },
+ {
+  "name": "money-066-11",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "建立高品質的人脈",
+  "label": "15",
+  "span": "p.81–84",
+  "chars": 3418
+ },
+ {
+  "name": "money-066-12",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "一個人走得快，一群人走得遠",
+  "label": "17",
+  "span": "p.88–91",
+  "chars": 2641
+ },
+ {
+  "name": "money-066-13",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "組織小型聚會",
+  "label": "18",
+  "span": "p.92–95",
+  "chars": 2637
+ },
+ {
+  "name": "money-066-14",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "和對方多待 1 小時的 3P 法則",
+  "label": "19",
+  "span": "p.98–104",
+  "chars": 4236
+ },
+ {
+  "name": "money-066-15",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "小事做好，才有機會做大事",
+  "label": "21",
+  "span": "p.108–109",
+  "chars": 1399
+ },
+ {
+  "name": "money-066-16",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "不要搶當 MVP，要當 MIP",
+  "label": "22",
+  "span": "p.110–112",
+  "chars": 1596
+ },
+ {
+  "name": "money-066-17",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "如何做好一場演講",
+  "label": "24",
+  "span": "p.115–118",
+  "chars": 3496
+ },
+ {
+  "name": "money-066-18",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "線上面試技巧",
+  "label": "25",
+  "span": "p.120–125",
+  "chars": 3533
+ },
+ {
+  "name": "money-066-19",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "自我推銷七步驟",
+  "label": "26",
+  "span": "p.128–131",
+  "chars": 2503
+ },
+ {
+  "name": "money-066-20",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "賣好處，不賣特點",
+  "label": "27",
+  "span": "p.132–134",
+  "chars": 1866
+ },
+ {
+  "name": "money-066-21",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "聽懂對方的弦外之音",
+  "label": "28",
+  "span": "p.135–138",
+  "chars": 3232
+ },
+ {
+  "name": "money-066-22",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "賣榴槤的顧客心理學",
+  "label": "29",
+  "span": "p.139–142",
+  "chars": 3187
+ },
+ {
+  "name": "money-066-23",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "餐點重要，還是服務重要",
+  "label": "34",
+  "span": "p.159–160",
+  "chars": 1986
+ },
+ {
+  "name": "money-066-24",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "談談自己的糗事",
+  "label": "35",
+  "span": "p.162–166",
+  "chars": 2986
+ },
+ {
+  "name": "money-066-25",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "機場測試",
+  "label": "37",
+  "span": "p.169–171",
+  "chars": 2060
+ },
+ {
+  "name": "money-066-26",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "將不幸變有幸",
+  "label": "40",
+  "span": "p.182–185",
+  "chars": 2448
+ },
+ {
+  "name": "money-066-27",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "戰勝尷尬癌",
+  "label": "41",
+  "span": "p.186–188",
+  "chars": 2101
+ },
+ {
+  "name": "money-066-28",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "先累積人力資本",
+  "label": "43",
+  "span": "p.194–197",
+  "chars": 2236
+ },
+ {
+  "name": "money-066-29",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "「追隨你的熱情」不是好建議",
+  "label": "44",
+  "span": "p.198–200",
+  "chars": 1982
+ },
+ {
+  "name": "money-066-30",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "因為我們各不相同，所以成為一體",
+  "label": "45",
+  "span": "p.201–204",
+  "chars": 2702
+ },
+ {
+  "name": "money-066-31",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "金錢真的可以買到時間",
+  "label": "51",
+  "span": "p.222–225",
+  "chars": 2572
+ },
+ {
+  "name": "money-066-32",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "起床後的關鍵 1 小時",
+  "label": "53",
+  "span": "p.229–232",
+  "chars": 2192
+ },
+ {
+  "name": "money-066-33",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "不僅要管理時間，還要管理精力",
+  "label": "54",
+  "span": "p.233–236",
+  "chars": 3169
+ },
+ {
+  "name": "money-066-34",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "工作和幸福，如何互相影響",
+  "label": "55",
+  "span": "p.242–243",
+  "chars": 1385
+ },
+ {
+  "name": "money-066-35",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "邊走邊談",
+  "label": "58",
+  "span": "p.250–251",
+  "chars": 1242
+ },
+ {
+  "name": "money-066-36",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "大自然教會我的事",
+  "label": "59",
+  "span": "p.252",
+  "chars": 693
+ },
+ {
+  "name": "money-066-37",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "展現脆弱的一面",
+  "label": "61",
+  "span": "p.262–266",
+  "chars": 2474
+ },
+ {
+  "name": "money-066-38",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "問問別人成功的過程",
+  "label": "62",
+  "span": "p.267–270",
+  "chars": 2479
+ },
+ {
+  "name": "money-066-39",
+  "book": "講好你的故事",
+  "bookId": "money-066",
+  "ch": "不要怕負面評論",
+  "label": "64",
+  "span": "p.274–277",
+  "chars": 2392
+ },
+ {
+  "name": "lit-046-00",
+  "book": "你要如何衡量你的人生？",
+  "bookId": "lit-046",
+  "ch": "如何讓你的熱情燃燒？",
+  "label": "①",
+  "span": "p.48–66",
+  "chars": 8780
+ },
+ {
+  "name": "lit-046-01",
+  "book": "你要如何衡量你的人生？",
+  "bookId": "lit-046",
+  "ch": "計畫與變化",
+  "label": "②",
+  "span": "p.77–90",
+  "chars": 5098
+ },
+ {
+  "name": "lit-046-02",
+  "book": "你要如何衡量你的人生？",
+  "bookId": "lit-046",
+  "ch": "策略的試金石",
+  "label": "③",
+  "span": "p.109–113",
+  "chars": 2807
+ },
+ {
+  "name": "lit-046-03",
+  "book": "你要如何衡量你的人生？",
+  "bookId": "lit-046",
+  "ch": "時鐘滴答響",
+  "label": "④",
+  "span": "p.127–141",
+  "chars": 5261
+ },
+ {
+  "name": "lit-046-04",
+  "book": "你要如何衡量你的人生？",
+  "bookId": "lit-046",
+  "ch": "一杯奶昔的任務",
+  "label": "⑤",
+  "span": "p.142–170",
+  "chars": 10318
+ },
+ {
+  "name": "lit-046-05",
+  "book": "你要如何衡量你的人生？",
+  "bookId": "lit-046",
+  "ch": "席瑟斯之船",
+  "label": "⑥",
+  "span": "p.177–195",
+  "chars": 6844
+ },
+ {
+  "name": "lit-046-06",
+  "book": "你要如何衡量你的人生？",
+  "bookId": "lit-046",
+  "ch": "一隻看不見的手",
+  "label": "⑧",
+  "span": "p.223–241",
+  "chars": 10146
+ },
+ {
+  "name": "lit-046-07",
+  "book": "你要如何衡量你的人生？",
+  "bookId": "lit-046",
+  "ch": "就這麼一次⋯⋯",
+  "label": "⑨",
+  "span": "p.261–263",
+  "chars": 1378
+ },
+ {
+  "name": "lit-046-08",
+  "book": "你要如何衡量你的人生？",
+  "bookId": "lit-046",
+  "ch": "結語　你拿什麼衡量人生",
+  "label": "結",
+  "span": "p.264–281",
+  "chars": 4799
+ },
+ {
+  "name": "money-054-00",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "改變習慣最有效的方法，是改變身分認同",
+  "label": "2",
+  "span": "p.46–61",
+  "chars": 9456
+ },
+ {
+  "name": "money-054-01",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "四個簡單的步驟，讓你建立更好的習慣",
+  "label": "3",
+  "span": "p.62–75",
+  "chars": 8167
+ },
+ {
+  "name": "money-054-02",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "開始一個新習慣最好的方法",
+  "label": "5",
+  "span": "p.89–101",
+  "chars": 7421
+ },
+ {
+  "name": "money-054-03",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "激勵被高估了，環境往往更重要",
+  "label": "6",
+  "span": "p.102–113",
+  "chars": 7467
+ },
+ {
+  "name": "money-054-04",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "自制力的祕密",
+  "label": "7",
+  "span": "p.114–123",
+  "chars": 1168
+ },
+ {
+  "name": "money-054-05",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "如何讓習慣變得難以抗拒",
+  "label": "8",
+  "span": "p.126–137",
+  "chars": 7284
+ },
+ {
+  "name": "money-054-06",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "家人與朋友如何形塑你的習慣",
+  "label": "9",
+  "span": "p.138",
+  "chars": 847
+ },
+ {
+  "name": "money-054-07",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "如何找出並解決壞習慣的成因",
+  "label": "",
+  "span": "p.158–163",
+  "chars": 3495
+ },
+ {
+  "name": "money-054-08",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "如何運用「兩分鐘法則」停止拖延",
+  "label": "13",
+  "span": "p.185–194",
+  "chars": 6258
+ },
+ {
+  "name": "money-054-09",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "如何讓好習慣變得無可避免，讓壞習慣不可能發生",
+  "label": "",
+  "span": "p.204–205",
+  "chars": 1216
+ },
+ {
+  "name": "money-054-10",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "如何每天堅持好習慣",
+  "label": "16",
+  "span": "p.221–233",
+  "chars": 7000
+ },
+ {
+  "name": "money-054-11",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "問責夥伴作用大",
+  "label": "",
+  "span": "p.242–243",
+  "chars": 1107
+ },
+ {
+  "name": "money-054-12",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "基因如何影響習慣的養成",
+  "label": "18",
+  "span": "p.246–259",
+  "chars": 8382
+ },
+ {
+  "name": "money-054-13",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "金髮女孩原則：如何在生活與工作中維持動力",
+  "label": "19",
+  "span": "p.260–269",
+  "chars": 5936
+ },
+ {
+  "name": "money-054-14",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "〈結語〉讓成果永續的祕訣",
+  "label": "",
+  "span": "p.285–287",
+  "chars": 1937
+ },
+ {
+  "name": "money-054-15",
+  "book": "原子習慣",
+  "bookId": "money-054",
+  "ch": "〈附錄〉來自行為改變四法則的一些啟示",
+  "label": "",
+  "span": "p.289–295",
+  "chars": 4440
+ },
+ {
+  "name": "money-048-00",
+  "book": "深度說服力",
+  "bookId": "money-048",
+  "ch": "前言",
+  "label": "",
+  "span": "p.9–13",
+  "chars": 3592
+ },
+ {
+  "name": "money-048-01",
+  "book": "深度說服力",
+  "bookId": "money-048",
+  "ch": "轉身面對奇異的自己",
+  "label": "1",
+  "span": "p.20–29",
+  "chars": 5820
+ },
+ {
+  "name": "money-048-02",
+  "book": "深度說服力",
+  "bookId": "money-048",
+  "ch": "故事的說服力",
+  "label": "2",
+  "span": "p.42–65",
+  "chars": 11603
+ },
+ {
+  "name": "money-048-03",
+  "book": "深度說服力",
+  "bookId": "money-048",
+  "ch": "絕對不要只想著成交",
+  "label": "3",
+  "span": "p.70–103",
+  "chars": 19257
+ },
+ {
+  "name": "money-048-04",
+  "book": "深度說服力",
+  "bookId": "money-048",
+  "ch": "正面特質的吸引力",
+  "label": "5",
+  "span": "p.140–145",
+  "chars": 4933
+ },
+ {
+  "name": "money-048-05",
+  "book": "深度說服力",
+  "bookId": "money-048",
+  "ch": "表現一點尊重",
+  "label": "6",
+  "span": "p.168–169",
+  "chars": 2501
+ },
+ {
+  "name": "money-048-06",
+  "book": "深度說服力",
+  "bookId": "money-048",
+  "ch": "重點不是我，是我們",
+  "label": "7",
+  "span": "p.174–183",
+  "chars": 8243
+ },
+ {
+  "name": "money-048-07",
+  "book": "深度說服力",
+  "bookId": "money-048",
+  "ch": "合作的必要",
+  "label": "8",
+  "span": "",
+  "chars": 176
+ },
+ {
+  "name": "money-048-08",
+  "book": "深度說服力",
+  "bookId": "money-048",
+  "ch": "找出共通點",
+  "label": "9",
+  "span": "p.222–227",
+  "chars": 3984
+ },
+ {
+  "name": "money-048-09",
+  "book": "深度說服力",
+  "bookId": "money-048",
+  "ch": "找到鼓舞你的人",
+  "label": "11",
+  "span": "p.257–274",
+  "chars": 4702
+ },
+ {
+  "name": "lit-049-00",
+  "book": "看穿內心情緒的行為暗示心理學",
+  "bookId": "lit-049",
+  "ch": "掌握「人性弱點」和「時機」，再頑強心防都能瓦解",
+  "label": "1",
+  "span": "p.32–34",
+  "chars": 1672
+ },
+ {
+  "name": "lit-049-01",
+  "book": "看穿內心情緒的行為暗示心理學",
+  "bookId": "lit-049",
+  "ch": "從「聲音語調」和「行為暗示」精準看穿他人",
+  "label": "2",
+  "span": "p.48–95",
+  "chars": 9142
+ },
+ {
+  "name": "lit-049-02",
+  "book": "看穿內心情緒的行為暗示心理學",
+  "bookId": "lit-049",
+  "ch": "聽懂「暗示語」，接話漂亮，誰都喜歡你",
+  "label": "3",
+  "span": "p.125–141",
+  "chars": 4534
+ },
+ {
+  "name": "lit-049-03",
+  "book": "看穿內心情緒的行為暗示心理學",
+  "bookId": "lit-049",
+  "ch": "日常習慣與好惡，窺探「情緒性格」的鑰匙",
+  "label": "4",
+  "span": "p.164–173",
+  "chars": 4794
+ }
+]

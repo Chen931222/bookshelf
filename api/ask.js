@@ -5,6 +5,8 @@
 
 const Anthropic = require('@anthropic-ai/sdk');
 const books = require('../books.json');
+const fs = require('fs');
+const path = require('path');
 
 const MODEL = 'claude-opus-5';
 const MAX_QUESTION = 500;      // 問題長度上限，擋掉把整篇文章貼進來當 prompt 用
@@ -52,7 +54,33 @@ function buildDigest() {
   return lines.join('\n\n');
 }
 
+/* 深讀筆記是這個書櫃最厚的一層（六本、25 萬字），先前完全沒餵給模型，
+   所以問到這六本只答得出目錄級的東西。這裡只放章名與「書中強調」的句子——
+   全文塞不進 context，而這兩樣已經足以讓回答落到內容層級。 */
+function buildDeep() {
+  const out = [];
+  for (const b of books.books.filter(x => x.deep)) {
+    let d;
+    try { d = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'deep', b.id + '.json'), 'utf8')); }
+    catch (_) { continue; }
+    const lines = [`《${b.t}》深讀筆記（${(d.chapters || []).length} 章）`];
+    for (const c of d.chapters || []) {
+      lines.push(`  ${[c.part, c.label, c.title].filter(Boolean).join(' ')}　${c.span || ''}`);
+      const strong = (c.groups || [])
+        .flatMap(g => (g.blocks || []).filter(x => x.t === 'quote' && x.kind))
+        .slice(0, 2).map(x => x.v);
+      strong.forEach(q => lines.push(`    書中強調：「${q}」`));
+    }
+    if (d.claude && d.claude.take && d.claude.take[0]) {
+      lines.push(`  導讀重點：${d.claude.take[0].slice(0, 120)}`);
+    }
+    out.push(lines.join('\n'));
+  }
+  return out.join('\n\n');
+}
+
 const DIGEST = buildDigest();
+const DEEP = buildDeep();
 
 const SYSTEM = `你是一座私人書櫃的閱讀夥伴。下面是這個書櫃的完整藏書資料，你只能根據這些內容回答。
 
@@ -64,8 +92,13 @@ const SYSTEM = `你是一座私人書櫃的閱讀夥伴。下面是這個書櫃�
 - 問題如果跟這個書櫃無關，簡短說明你只能聊這座書櫃裡的書。
 - 長度控制在四段以內，不要開條列清單堆砌，用完整句子把書串起來。
 
+- 有深讀筆記的那幾本，你知道的內容比其他書多得多，回答時可以講到章節與具體主張。
+
 === 藏書資料 ===
-${DIGEST}`;
+${DIGEST}
+
+=== 深讀筆記（這六本我讀得比較細）===
+${DEEP}`;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
