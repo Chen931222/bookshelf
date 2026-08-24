@@ -1,6 +1,6 @@
 # bookshelf — 書櫃
 
-實體書櫃的線上目錄：約 100 本藏書，橫向書牆＋分類展覽兩種視圖，
+實體書櫃的線上目錄：130 冊藏書，橫向書牆＋分類展覽兩種視圖，
 書封是自己拍的（`covers/`，webp）。
 
 線上版：https://bookshelf-nine-gamma.vercel.app

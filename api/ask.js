@@ -8,7 +8,21 @@ const books = require('../books.json');
 const fs = require('fs');
 const path = require('path');
 
-const MODEL = 'claude-opus-5';
+// 輕量防濫用：這是公開、免登入的端點，避免有人狂打把 Anthropic 額度燒光。
+// 暖實例內以 IP 做每分鐘限次；真正的每日上限需接共享儲存（如 Upstash），冷啟動後計數會歸零。
+const HITS = new Map();
+const RL_WINDOW_MS = 60_000;
+const RL_MAX = 12;               // 每個 IP 每分鐘上限
+function rateLimited(ip) {
+  const now = Date.now();
+  const recent = (HITS.get(ip) || []).filter(t => now - t < RL_WINDOW_MS);
+  recent.push(now);
+  HITS.set(ip, recent);
+  if (HITS.size > 5000) HITS.clear();   // 防記憶體無限成長
+  return recent.length > RL_MAX;
+}
+
+const MODEL = 'claude-haiku-4-5-20251001';   // 公開端點：用便宜、夠聊書櫃的 Haiku，把每次呼叫成本壓到最低
 const MAX_QUESTION = 500;      // 問題長度上限，擋掉把整篇文章貼進來當 prompt 用
 const MAX_OUTLINE = 140;       // 每本書的大綱截斷長度，控制 prompt 體積
 
@@ -105,6 +119,11 @@ module.exports = async (req, res) => {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+  if (rateLimited(ip)) {
+    res.status(429).json({ error: '太多人在問了，等一下再試。' });
+    return;
+  }
   if (!process.env.ANTHROPIC_API_KEY) {
     res.status(503).json({ error: '尚未設定 ANTHROPIC_API_KEY' });
     return;
@@ -127,9 +146,7 @@ module.exports = async (req, res) => {
     // 串流：整份書單摘要很長，非串流容易撞到請求逾時，而且邊打字邊出字體感好很多
     const stream = client.messages.stream({
       model: MODEL,
-      max_tokens: 16000,           // 思考與回答共用這個上限，留寬一點
-      thinking: { type: 'adaptive' },
-      output_config: { effort: 'medium' },
+      max_tokens: 2048,            // 聊書櫃四段內就夠，壓低輸出成本
       system: [
         { type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }
       ],
