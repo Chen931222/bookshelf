@@ -76,6 +76,23 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .card--deep .card__name i,.card--deep .card__count{color:#C08A4E}
 .card--deep:hover,.card--deep:focus-visible{filter:none;border-color:#C08A4E}
 
+/* 首頁問句條：書櫃裡最硬的那一段（臨場速查）不該只是八張卡裡的第二張。
+   卡片順序不動（深讀排第一是主人自己的使用習慣），改成在刊頭底下直接給一個問句，
+   打完就帶著這句話進速查。 */
+.homeq{position:fixed;z-index:41;left:clamp(20px,2.4vw,42px);top:clamp(62px,10vh,110px);
+  width:min(440px,calc(100vw - 40px))}
+.homeq__k{font-family:var(--mono);font-size:clamp(10px,.72vw,12px);letter-spacing:.24em;color:#C08A4E}
+.homeq__row{display:flex;align-items:center;margin-top:8px;border-bottom:1px solid rgba(242,236,224,.3);
+  transition:border-color .25s}
+.homeq__row:focus-within{border-color:#C08A4E}
+.homeq__in{flex:1 1 auto;min-width:0;background:transparent;border:0;outline:none;color:var(--paper);
+  font-family:var(--serif);font-size:clamp(15px,1.05vw,17px);padding:.7em 0}
+.homeq__in::placeholder{color:rgba(242,236,224,.38)}
+.homeq__go{flex:none;background:none;border:0;color:rgba(242,236,224,.6);cursor:pointer;
+  font-family:var(--serif);font-size:clamp(14px,1vw,16px);padding:.6em 0 .6em .9em;transition:color .2s}
+.homeq__go:hover,.homeq__go:focus-visible{color:#C08A4E;outline:none}
+.homeq__sub{margin-top:10px;font-size:clamp(11.5px,.78vw,13px);line-height:1.7;color:rgba(242,236,224,.5)}
+@media (max-height:760px){.homeq__sub{display:none}}
 .counter{position:fixed;left:50%;bottom:clamp(24px,2.6vw,46px);transform:translateX(-50%);
   z-index:40;display:flex;align-items:center;gap:9px;font-family:var(--mono);
   font-size:clamp(11px,.73vw,14px);letter-spacing:.1em;mix-blend-mode:difference;pointer-events:none}
@@ -672,6 +689,16 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   <a href="#其他" id="miscLink">其他</a>
 </div>
 
+<form class="homeq" id="homeQ" role="search" autocomplete="off">
+  <label class="homeq__k" for="homeQIn">臨場速查　遇到什麼場面？</label>
+  <div class="homeq__row">
+    <input class="homeq__in" id="homeQIn" type="search" enterkeyhint="search"
+           placeholder="例：對方一直抱怨工作沒意義">
+    <button class="homeq__go" type="submit">查 →</button>
+  </div>
+  <p class="homeq__sub" id="homeQSub">用你自己的話搜，不必記得書裡的術語。</p>
+</form>
+
 <div class="gallery" id="gallery" tabindex="0" role="region" aria-label="書櫃分類，可橫向捲動">
   <ul class="track" id="track"></ul>
 </div>
@@ -820,6 +847,15 @@ HOMECATS.forEach(c=>{
     +(reading?'<span class="card__reading">正在讀 '+reading+'</span>':'')+'</span></a>');
 });
 $("total").textContent=cardCount;
+
+/* 首頁問句條：帶著這句話進速查。空白送出就照舊打開速查首頁。 */
+$("homeQSub").textContent="用你自己的話搜，不必記得書裡的術語。卡片從 "+DEEPS.length+" 本深讀筆記萃出來，搜尋不連網。";
+$("homeQ").addEventListener("submit",e=>{
+  e.preventDefault();
+  qkQuery=$("homeQIn").value.trim(); qkTopic=""; qkShow=8;
+  $("homeQIn").blur();
+  openQK();
+});
 
 let gtarget=0, graf=null;
 function onGWheel(e){
@@ -1578,7 +1614,7 @@ function qkRender(){
     h+='<p class="qk__none">';
     if(qkTopic&&all) h+='「'+esc(qkTopic)+'」裡沒有，但其他主題有 '+all+' 張。';
     else h+='這裡沒有。換個說法試試，或先看看上面的主題——'
-      +'書櫃裡目前只有五本深讀筆記，涵蓋得到的情境有限。';
+      +'書櫃裡目前只有 '+DEEPS.length+' 本深讀筆記，涵蓋得到的情境有限。';
     h+='</p>';
     // 取消篩選之後還是 0 筆的話，這顆按鈕按了也是白按，不要給
     if(qkTopic&&all) h+='<button class="qk__more" type="button" data-topic="">搜尋全部主題（'+all+' 張）</button>';
