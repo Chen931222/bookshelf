@@ -672,11 +672,36 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   .panel{display:block;overflow:visible;padding:0 22px 110px}
   .panel__meta{border-top:none;padding-top:.6em}
 }
+/* ---------- 首頁開場：只在載入時播一次 ----------
+   刊頭先浮出，卡片像從書架上一本本抽出來站好，問句條最後出現。
+   預設是看得見的：只有 <head> 的小腳本加上 .intro 才會先藏起來，
+   JS 掛掉或書單讀不到，3 秒後一律放出來，不會卡在空白頁。 */
+@keyframes introRise{from{clip-path:inset(100% 0 0 0);transform:translateY(46px)}
+  to{clip-path:inset(0 0 0 0);transform:none}}
+@keyframes introFade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.intro .nav__mark,.intro .cell,.intro .homeq,.intro .book-nav,.intro .counter,.intro .hint{visibility:hidden}
+.intro-go .nav__mark,.intro-go .cell,.intro-go .homeq,.intro-go .book-nav,.intro-go .counter,.intro-go .hint{visibility:visible}
+.intro-go .nav__mark{display:inline-block;animation:introRise .7s cubic-bezier(.16,1,.3,1) both}
+/* 卡片只用 backwards：播完不留 clip-path，否則 hover 上浮和焦點框會被裁掉 */
+.intro-go .cell{animation:introRise .95s cubic-bezier(.16,1,.3,1) backwards;
+  animation-delay:calc(180ms + var(--i,0) * 90ms)}
+.intro-go .homeq{animation:introFade .8s cubic-bezier(.16,1,.3,1) .62s backwards}
+.intro-go .book-nav,.intro-go .hint{animation:introFade .7s cubic-bezier(.16,1,.3,1) .9s backwards}
+/* counter 靠 translateX(-50%) 置中，不能被動畫的 transform 蓋掉 */
+.intro-go .counter{animation:introCount .7s ease-out .9s backwards}
+@keyframes introCount{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){
   .card,.counter__strip{transition:none}
   .focus__spin{animation:none}
 }
 </style>
+<script>
+/* 首頁開場的前置：還沒畫出任何東西前先把要進場的元素藏起來。減少動態的人不藏。 */
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  document.documentElement.classList.add('intro');
+  setTimeout(function(){document.documentElement.classList.remove('intro','intro-go');},3000);
+}
+</script>
 </head>
 <body>
 
@@ -815,7 +840,7 @@ const DEEPS = BOOKS.filter(b=>b.deep);
    不要各自數各自的（先前深讀卡另外算，換順序就會錯號）。 */
 let cardCount = 0;
 function addCell(html){
-  const li=document.createElement("li"); li.className="cell";
+  const li=document.createElement("li"); li.className="cell"; li.style.setProperty("--i",cardCount);
   li.innerHTML=html;
   track.appendChild(li);
   strip.insertAdjacentHTML("beforeend","<span>"+(++cardCount)+"</span>");
@@ -847,6 +872,14 @@ HOMECATS.forEach(c=>{
     +(reading?'<span class="card__reading">正在讀 '+reading+'</span>':'')+'</span></a>');
 });
 $("total").textContent=cardCount;
+/* 卡片都排好了才開播開場，播完把 class 拿掉，之後的 hover／焦點不受影響 */
+{
+  const root=document.documentElement;
+  if(root.classList.contains("intro")){
+    root.classList.add("intro-go");
+    setTimeout(()=>root.classList.remove("intro","intro-go"),2400);
+  }
+}
 
 /* 首頁問句條：帶著這句話進速查。空白送出就照舊打開速查首頁。 */
 $("homeQSub").textContent="用你自己的話搜，不必記得書裡的術語。卡片從 "+DEEPS.length+" 本深讀筆記萃出來，搜尋不連網。";
