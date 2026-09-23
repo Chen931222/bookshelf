@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#141310">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -609,6 +609,10 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 .row__t{flex:1 1 auto;min-width:0;font-size:clamp(16px,1.3vw,21px);line-height:1.35;font-weight:500}
 .row__a{flex:none;font-family:var(--mono);font-size:clamp(10px,.72vw,12px);color:var(--dim);text-align:right;max-width:36%}
 .row.is-reading .row__t::after{content:"　正在讀";font-family:var(--mono);font-size:.62em;letter-spacing:.14em;color:var(--accent);vertical-align:.15em}
+.row{cursor:pointer;transition:background-color .2s ease}
+.row:hover{background:rgba(242,236,224,.04)}
+.row:hover .row__t{color:var(--accent)}
+.row:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
 .row.is-review{opacity:.6}
 .row.is-review .row__t::before{content:"⌇ ";color:var(--accent)}
 
@@ -1054,7 +1058,7 @@ function openFocus(i){
   focus.classList.add("is-on");
   /* 書的詳情打開時，把類別層的按鈕收起來——否則兩顆 Close 疊在同一個位置，
      點到的會是上層那顆（關掉整個類別），詳情面板就關不掉了 */
-  $("catClose").hidden=true; $("listBtn").hidden=true; $("homeBtn").hidden=true;
+  $("catClose").hidden=true; $("listBtn").hidden=true; $("homeBtn").hidden=true; $("lvClose").hidden=true;
   cat.classList.add("is-focusing");
   $("focusClose").hidden=false;
   $("focusClose").focus();
@@ -1064,6 +1068,8 @@ function closeFocus(){
   cat.classList.remove("is-focusing");
   /* 回到類別層，把該層的按鈕放回來 */
   if(openKey){ $("catClose").hidden=false; $("listBtn").hidden=false; $("homeBtn").hidden=false; }
+  /* 從清單點進來的，關掉詳情要回到清單原位，不是跳回廊道 */
+  if(listview.classList.contains("is-on")){ $("lvClose").hidden=false; if(listRow&&listRow.isConnected){ listRow.focus(); return; } }
   stage.focus();
 }
 /* 點面板以外的模糊背景也能關掉，多一條直覺的退路 */
@@ -1077,7 +1083,7 @@ const listview=$("listview");
 function buildList(c){
   const books=byCat(c.key), reading=books.filter(b=>b.r), shelf=books.filter(b=>!b.r);
   const authors=new Set(books.map(b=>b.a).filter(Boolean)), review=books.filter(b=>b.rv).length;
-  const row=(b,idx)=>'<li class="row'+(b.r?' is-reading':'')+(b.rv?' is-review':'')+'">'
+  const row=(b,idx)=>'<li class="row'+(b.r?' is-reading':'')+(b.rv?' is-review':'')+'" tabindex="0" role="button" data-id="'+esc(b.id)+'">'
     +'<span class="row__i">'+String(idx).padStart(2,"0")+'</span>'
     +'<span class="row__t">'+esc(b.t)+'</span><span class="row__a">'+esc(b.a||'—')+'</span></li>';
   let h='<p class="panel__kicker" style="--accent:'+tint(c.color)+';color:'+tint(c.color)+'">'+esc(c.name)+'</p>'
@@ -1092,6 +1098,17 @@ function buildList(c){
 function openList(){buildList(CATS.find(c=>c.key===openKey)); listview.classList.add("is-on"); $("lvClose").hidden=false;}
 function closeList(){listview.classList.remove("is-on"); $("lvClose").hidden=true; stage.focus();}
 $("listBtn").addEventListener("click",openList);
+/* 清單列點下去直接開書（之前只能從廊道點封面開） */
+let listRow=null;
+function openFromRow(li){
+  const i=objs.findIndex(o=>o.b.id===li.dataset.id); if(i<0) return;
+  listRow=li; openFocus(i);
+}
+$("lvInner").addEventListener("click",e=>{ const li=e.target.closest(".row"); if(li) openFromRow(li); });
+$("lvInner").addEventListener("keydown",e=>{
+  if(e.key!=="Enter"&&e.key!==" ") return;
+  const li=e.target.closest(".row"); if(!li) return; e.preventDefault(); openFromRow(li);
+});
 $("lvClose").addEventListener("click",closeList);
 
 /* ---------- 開關類別 ---------- */
