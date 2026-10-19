@@ -373,7 +373,10 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 /* 書上用三顆紅星號分節，網頁照搬——比一條細線更像那本書 */
 .deep__star{margin:clamp(34px,5.5vh,64px) 0 clamp(26px,4vh,44px);text-align:center;
   font-size:clamp(11px,.8vw,13px);letter-spacing:1.1em;text-indent:1.1em;color:var(--red);opacity:.72}
-.deep__g{margin-top:clamp(46px,7.5vh,92px)}
+/* 一篇近十萬字、三千多個節點，一次全排版主執行緒會卡 0.6 秒（手機三到五倍）。
+   content-visibility 讓瀏覽器只排版畫面附近的小節，其餘捲到才算；實測長任務歸零。
+   代價：沒排到的小節高度是估的，所以「記住讀到哪」改存小節編號、跳章用 scrollIntoView。 */
+.deep__g{margin-top:clamp(46px,7.5vh,92px);content-visibility:auto;contain-intrinsic-size:auto 900px;scroll-margin-top:24px}
 .deep__ch>.deep__g:first-of-type{margin-top:clamp(28px,4.6vh,52px)}
 /* 沒拍到的段落畫一條斷線說清楚，免得讀起來像連續的 */
 /* 頂部閱讀進度條。兩小時的長文，讀者要看得到自己在哪 */
@@ -1307,7 +1310,7 @@ async function openDeep(id,jumpCh){
   deep.scrollTop=0;
   try{
     if(!deepCache[id]){
-      deepCache[id]=await fetch('deep/'+id+'.json',{cache:'no-cache'}).then(r=>{
+      deepCache[id]=await fetch('deep/'+id+'.json').then(r=>{
         if(!r.ok) throw new Error('deep/'+id+'.json '+r.status);
         return r.json();
       });
@@ -1318,17 +1321,17 @@ async function openDeep(id,jumpCh){
     /* 先把上次的位置讀出來，再 wireDeep。順序不能顛倒——
        wireDeep 會呼叫 deepSpy，那一刻 scrollTop 是 0，會立刻把記錄覆寫成 0。
        同理 wireDeep 期間先把 deepId 清掉，免得它寫到別本書的記錄上。 */
-    let at=0;
-    if(!jumpCh){ try{ at=+(localStorage.getItem("shelf.at."+id)||0); }catch(_){} }
+    let sec=0;
+    if(!jumpCh){ try{ sec=+(localStorage.getItem("shelf.sec."+id)||0); }catch(_){} }
     deepId=null;
     wireDeep();
     deepId=id;
     // 從速查卡指定跳章時不還原——那時要的是那一章，不是上次停下來的地方
-    if(at>400&&at<deep.scrollHeight-deep.clientHeight){ deep.scrollTop=at; deepSpy(); }
+    if(sec>0&&deepSecs[sec]){ deepJump(deepSecs[sec],"auto"); }
     if(jumpCh){
       const t=[...deep.querySelectorAll(".deep__cht")].find(e=>e.textContent===jumpCh);
       const g=t&&t.closest(".deep__ch").querySelector(".deep__g");
-      if(g){ deep.scrollTop=g.getBoundingClientRect().top-deep.getBoundingClientRect().top+deep.scrollTop-24; deepSpy(); }
+      if(g) deepJump(g,"auto");
     }
   }catch(e){
     deep.innerHTML='<div class="deep__inner"><p class="deep__kicker">讀不到</p>'
@@ -1510,8 +1513,9 @@ function deepSpy(){
   const deepIn=deep.scrollTop>deep.clientHeight*.6;
   if(deepTop) deepTop.classList.toggle("is-on",deepIn);
   if(deepNav) deepNav.classList.toggle("is-on",deepIn);
-  // 記住讀到哪。兩小時的長文關掉就歸零，是讀不完的主因
-  if(deepId){ try{ localStorage.setItem("shelf.at."+deepId,String(Math.round(deep.scrollTop))); }catch(_){} }
+  // 記住讀到哪。兩小時的長文關掉就歸零，是讀不完的主因。
+  // 存小節編號不存像素：content-visibility 之下頁面高度會變，像素位置不可靠
+  if(deepId){ try{ localStorage.setItem("shelf.sec."+deepId,String(cur)); }catch(_){} }
 }
 /* 這兩個 listener 只掛一次。每開一本只換上面那三個參考——
    若放進 openDeep 裡重掛，反覆開關之後同一個 spy 會被呼叫好幾次。 */
@@ -1519,6 +1523,14 @@ deep.addEventListener("scroll",()=>{ if(!deepTick){ deepTick=true; requestAnimat
 /* 這篇有七萬像素高，跨章的平滑捲動會慢到沒有意義，遠距離改成直接跳 */
 function deepGo(top){
   deep.scrollTo({top,behavior:Math.abs(top-deep.scrollTop)>6000?"auto":"smooth"});
+}
+/* 跳到某個小節。scroll-margin-top 負責留 24px 空；跳遠了不要 smooth，
+   content-visibility 之下平滑捲過幾萬像素每一格都要現算，會抖 */
+function deepJump(el,mode){
+  const far=Math.abs(el.getBoundingClientRect().top-deep.getBoundingClientRect().top)>6000;
+  el.scrollIntoView({block:"start",behavior:(mode==="auto"||far||rm.matches)?"auto":"smooth"});
+  // 捲過去之後上面的小節才真的排版、高度會修正，下一幀再對一次位置
+  requestAnimationFrame(()=>{ el.scrollIntoView({block:"start",behavior:"auto"}); deepSpy(); });
 }
 function openSheet(){
   if(!deepSheet) return;
@@ -1536,7 +1548,7 @@ deep.addEventListener("click",e=>{
     e.preventDefault();
     closeSheet();
     const s=deepSecs[+a.dataset.sec];
-    if(s) deepGo(s.getBoundingClientRect().top-deep.getBoundingClientRect().top+deep.scrollTop-24);
+    if(s) deepJump(s);
     return;
   }
   if(e.target.closest(".deep__top")){ closeSheet(); deepGo(0); return; }
@@ -1809,18 +1821,22 @@ function dxHTML(metas){
     +'<p class="dx__foot">深讀筆記只挑少數幾本，會慢慢增加。'
     +'其他書的心得、劃線和標籤，收在書櫃裡各本書自己的面板。</p>';
 }
-/* 順手把內文抓進 deepCache，點進去就不用再等一次。
-   篇數多到十幾篇以後這裡要改成只抓摘要，現在幾篇而已不值得先做。 */
+/* 索引頁只要四個數字，以前卻把七篇全文（約 1.9MB）全抓下來現算，
+   開索引就先卡一下。現在數字讀 deep/_meta.json（tools/deep-meta.mjs 產、1KB），
+   全文改成瀏覽器閒下來才預抓，點進去照樣不用等；省流量模式不預抓。 */
 function dxMeta(){
-  return Promise.all(DEEPS.map(async b=>{
-    try{
-      if(!deepCache[b.id]){
-        deepCache[b.id]=await fetch('deep/'+b.id+'.json',{cache:'no-cache'})
-          .then(r=>r.ok?r.json():Promise.reject(new Error(String(r.status))));
-      }
-      return deepStats(deepCache[b.id]);
-    }catch(_){ return null; }      // 抓不到就只是少顯示數字，不擋整頁
-  }));
+  return fetch('deep/_meta.json').then(r=>r.ok?r.json():Promise.reject(new Error(String(r.status))))
+    .then(meta=>DEEPS.map(b=>{ const m=meta[b.id]; return m?{span:m.span,words:m.words,mins:m.mins,chs:{length:m.chs}}:null; }))
+    .catch(()=>DEEPS.map(()=>null))      // 抓不到就只是少顯示數字，不擋整頁
+    .finally(()=>{
+      const save=navigator.connection&&navigator.connection.saveData;
+      if(save) return;
+      const idle=window.requestIdleCallback||(f=>setTimeout(f,1200));
+      idle(()=>{ DEEPS.forEach(b=>{
+        if(deepCache[b.id]) return;
+        fetch('deep/'+b.id+'.json').then(r=>r.ok?r.json():null).then(d=>{ if(d) deepCache[b.id]=d; }).catch(()=>{});
+      }); });
+    });
 }
 async function openDX(){
   if(busy) return;

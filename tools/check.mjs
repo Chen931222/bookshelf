@@ -104,6 +104,15 @@ for (const p of ['raw/', 'pipeline/', 'tools/', '*.bak']) {
 }
 ok('.vercelignore 擋住了原始照片與管線資料');
 
+/* ---------- deep/_meta.json 要跟 deep/*.json 一致 ---------- */
+{
+  const { buildMeta } = await import('./deep-meta.mjs');
+  const want = JSON.stringify(buildMeta());
+  const have = fs.existsSync(R('deep/_meta.json')) ? JSON.stringify(read('deep/_meta.json')) : '';
+  if (want !== have) fail.push('deep/_meta.json 過期或不存在：改了深讀之後要跑 node tools/deep-meta.mjs');
+  else ok('deep/_meta.json 跟深讀內容一致');
+}
+
 /* ---------- 結果 ---------- */
 console.log('');
 if (warn.length) { console.log('提醒：'); warn.forEach(w => console.log('  · ' + w)); console.log(''); }
