@@ -36,6 +36,10 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
   align-items:baseline;padding:clamp(20px,2.4vw,42px);mix-blend-mode:difference;pointer-events:none}
 .nav>*{pointer-events:auto}
 .nav__mark{font-size:clamp(17px,1.5vw,28px);font-weight:600;letter-spacing:.14em}
+/* 刊頭下的編者一句話：陌生人第一眼要知道這是誰的書櫃、哪些字是主人寫的 */
+.nav__brand{display:flex;flex-direction:column;gap:6px}
+.nav__sub{font-size:clamp(12px,.85vw,14px);line-height:1.6;letter-spacing:.04em;
+  color:rgba(242,236,224,.62);max-width:36ch}
 .nav__link{font-family:var(--mono);font-size:clamp(11px,.78vw,14px);letter-spacing:.16em;
   text-transform:uppercase;color:var(--paper);text-decoration:none;opacity:.65}
 .nav__link:hover,.nav__link:focus-visible{opacity:1}
@@ -79,7 +83,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 /* 首頁問句條：書櫃裡最硬的那一段（臨場速查）不該只是八張卡裡的第二張。
    卡片順序不動（深讀排第一是主人自己的使用習慣），改成在刊頭底下直接給一個問句，
    打完就帶著這句話進速查。 */
-.homeq{position:fixed;z-index:41;left:clamp(20px,2.4vw,42px);top:clamp(62px,10vh,110px);
+.homeq{position:fixed;z-index:41;left:clamp(20px,2.4vw,42px);top:clamp(104px,15vh,156px);
   width:min(440px,calc(100vw - 40px))}
 .homeq__k{font-family:var(--mono);font-size:clamp(10px,.72vw,12px);letter-spacing:.24em;color:#C08A4E}
 .homeq__row{display:flex;align-items:center;margin-top:8px;border-bottom:1px solid rgba(242,236,224,.3);
@@ -665,6 +669,11 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 @media (max-width:767px){
   :root{--card-w:62vw}
   .track{gap:10vw}
+  /* 刊頭多了一句話之後，問句條在 375×812 會壓到卡片頂（量過：245 對 242），
+     手機上把它收緊、副標不顯示 */
+  .homeq{top:92px}
+  .homeq__in{padding:.45em 0}
+  .homeq__sub{display:none}
   /* 手機：整片改成一般流動捲動，書在上、資訊在下，避免內容被裁掉 */
   .focus{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .focus__spinwrap{display:flex;align-items:center;justify-content:center;
@@ -679,8 +688,9 @@ body{background:var(--ink);color:var(--paper);font-family:var(--serif);
 @keyframes introRise{from{clip-path:inset(100% 0 0 0);transform:translateY(46px)}
   to{clip-path:inset(0 0 0 0);transform:none}}
 @keyframes introFade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.intro .nav__mark,.intro .cell,.intro .homeq,.intro .book-nav,.intro .counter,.intro .hint{visibility:hidden}
-.intro-go .nav__mark,.intro-go .cell,.intro-go .homeq,.intro-go .book-nav,.intro-go .counter,.intro-go .hint{visibility:visible}
+.intro .nav__mark,.intro .nav__sub,.intro .cell,.intro .homeq,.intro .book-nav,.intro .counter,.intro .hint{visibility:hidden}
+.intro-go .nav__mark,.intro-go .nav__sub,.intro-go .cell,.intro-go .homeq,.intro-go .book-nav,.intro-go .counter,.intro-go .hint{visibility:visible}
+.intro-go .nav__sub{animation:introFade .8s cubic-bezier(.16,1,.3,1) .45s backwards}
 .intro-go .nav__mark{display:inline-block;animation:introRise .7s cubic-bezier(.16,1,.3,1) both}
 /* 卡片只用 backwards：播完不留 clip-path，否則 hover 上浮和焦點框會被裁掉 */
 .intro-go .cell{animation:introRise .95s cubic-bezier(.16,1,.3,1) backwards;
@@ -706,7 +716,10 @@ if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
 <body>
 
 <nav class="nav" id="homeNav">
-  <span class="nav__mark">書櫃</span>
+  <div class="nav__brand">
+    <span class="nav__mark">書櫃</span>
+    <p class="nav__sub" id="navSub"></p>
+  </div>
 </nav>
 <div class="book-nav" id="bookNav">
   <a href="#問書櫃" id="askLink">問書櫃</a>
@@ -872,6 +885,9 @@ HOMECATS.forEach(c=>{
     +(reading?'<span class="card__reading">正在讀 '+reading+'</span>':'')+'</span></a>');
 });
 $("total").textContent=cardCount;
+/* 數字從資料算：首頁六個分類的冊數加總（不含隱藏的「其他」） */
+$("navSub").textContent="一個人的實體書櫃。"
+  +HOMECATS.reduce((n,c)=>n+byCat(c.key).length,0)+" 冊，大綱是查來的，評語是自己寫的。";
 /* 卡片都排好了才開播開場，播完把 class 拿掉，之後的 hover／焦點不受影響 */
 {
   const root=document.documentElement;
@@ -885,7 +901,7 @@ $("total").textContent=cardCount;
 $("homeQSub").textContent="用你自己的話搜，不必記得書裡的術語。卡片從 "+DEEPS.length+" 本深讀筆記萃出來，搜尋不連網。";
 $("homeQ").addEventListener("submit",e=>{
   e.preventDefault();
-  qkQuery=$("homeQIn").value.trim(); qkTopic=""; qkShow=8;
+  qkQuery=$("homeQIn").value.trim(); qkTopic=""; qkShow=8; qkForce=false;
   $("homeQIn").blur();
   openQK();
 });
@@ -939,7 +955,9 @@ function clearWipe(){ctx.clearRect(0,0,wipe.width,wipe.height);}
 
 /* ---------- 3D 廊道 ---------- */
 const cat=$("cat"), stage=$("stage"), world=$("world"), hud=$("hud");
-const STEP=330, RX=520, RY=340, P=1100, NEAR=P*0.82, FAR=-2600, FADE=900;
+const STEP=330, RX=520, RY=340, P=1100, NEAR=P*0.82, SWEET=P*0.35;
+/* 原本 FAR=-2600 時同時有十本左右半透明疊在中間，什麼都看不清。
+   改成甜蜜點那本全亮，往後每隔一本掉 1/3，三本之後就不見。 */
 let objs=[], camZ=0, camTarget=0, sraf=null, openKey=null, lastFocus=null;
 
 function seed(i){const a=Math.sin((i+1)*12.9898)*43758.5453, b=Math.sin((i+1)*78.233)*43758.5453;
@@ -995,13 +1013,12 @@ function updateStage(instant){
     const eff=o.z+camZ;                 // 螢幕 z：越接近 P 越貼臉
     let op=1;
     if(eff>NEAR) op=0;                  // 穿過視點，隱藏
-    else if(eff<FAR) op=0;              // 太遠
-    else if(eff<FAR+FADE) op=(eff-FAR)/FADE;
     else if(eff>NEAR-260) op=Math.max(0,(NEAR-eff)/260);
+    else if(eff<SWEET) op=Math.max(0,1-((SWEET-eff)/STEP)*0.34);   // 甜蜜點之後逐本退場
     o.el.style.opacity=op;
     o.el.style.visibility = op<=0.02 ? "hidden":"visible";
     o.el.classList.toggle("is-dim", op<=0.02);
-    const d=Math.abs(eff-(P*0.35));
+    const d=Math.abs(eff-SWEET);
     if(op>0.2 && d<frontD){frontD=d; front=+o.el.dataset.i;}
   }
   const hn=$("hudN"); if(hn) hn.textContent=String(front+1).padStart(2,"0");
@@ -1075,6 +1092,11 @@ function detailHTML(b){
     h+='<div class="sec"><p class="sec__h">大綱</p>'
       +'<p class="sec__body">'+esc(outline)+'</p></div>';
   }
+  /* 評語緊跟大綱。它是自己寫的，不該排在網路上抓得到的評價後面、要捲到底才看得到 */
+  if(r.verdict){
+    h+='<div class="sec"><div class="mine"><span class="mine__tag">評語</span>'
+      +esc(r.verdict)+'</div></div>';
+  }
   if(r.points&&r.points.length){
     h+='<div class="sec"><p class="sec__h">書裡的觀點</p><ul class="pts">'
       +r.points.map(p=>'<li>'+esc(p)+'</li>').join('')+'</ul></div>';
@@ -1083,10 +1105,6 @@ function detailHTML(b){
     h+='<div class="sec"><p class="sec__h">各界評價</p><div class="rev">'
       +r.reception.map(x=>'<div class="rev__i"><p class="rev__s">'+esc(x.src)+'</p>'
         +'<p class="rev__t">'+esc(x.text)+'</p></div>').join('')+'</div></div>';
-  }
-  if(r.verdict){
-    h+='<div class="sec"><div class="mine"><span class="mine__tag">評語</span>'
-      +esc(r.verdict)+'</div></div>';
   }
   if(!h){
     h='<p class="nores">這本還沒有整理到資料。冷門書、雜誌、工具書網路上常常查不到，'
@@ -1121,7 +1139,7 @@ function openFocus(i){
     +(b.pub?'出版　<b>'+esc(b.pub)+(b.yr?'　'+b.yr:'')+'</b><br>':'')
     +'在書櫃　<b>'+lyLabel(b.ly)+'</b><br>'
     +'擺法　<b>'+oriLabel(b.o)+'</b>'+(b.r?'　·　<b style="color:'+accent+'">正在讀</b>':'')
-    +(b.rv?'<br><b style="color:'+accent+'">書名待你核對</b>':'')+'</div>'
+    +(b.rv?'<br><b style="color:'+accent+'">書名未核對</b>':'')+'</div>'
     +detailHTML(b);
   panel.scrollTop=0;
   focus.classList.add("is-on");
@@ -1151,17 +1169,17 @@ $("focusClose").addEventListener("click",closeFocus);
 const listview=$("listview");
 function buildList(c){
   const books=byCat(c.key), reading=books.filter(b=>b.r), shelf=books.filter(b=>!b.r);
-  const authors=new Set(books.map(b=>b.a).filter(Boolean)), review=books.filter(b=>b.rv).length;
+  const authors=new Set(books.map(b=>b.a).filter(Boolean));
   const row=(b,idx)=>'<li class="row'+(b.r?' is-reading':'')+(b.rv?' is-review':'')+'" tabindex="0" role="button" data-id="'+esc(b.id)+'">'
     +'<span class="row__i">'+String(idx).padStart(2,"0")+'</span>'
     +'<span class="row__t">'+esc(b.t)+'</span><span class="row__a">'+esc(b.a||'—')+'</span></li>';
   let h='<p class="panel__kicker" style="--accent:'+tint(c.color)+';color:'+tint(c.color)+'">'+esc(c.name)+'</p>'
     +'<h1 class="lv__name">'+esc(c.name)+'</h1>'
     +'<div class="lv__meta"><b style="color:var(--paper)">'+books.length+'</b> 冊 · <b style="color:var(--paper)">'+authors.size+'</b> 位作者'
-    +(reading.length?' · <b style="color:var(--paper)">'+reading.length+'</b> 本正在讀':'')
-    +(review?'<br>'+review+' 本待你核對（⌇）':'')+'</div>';
+    +(reading.length?' · <b style="color:var(--paper)">'+reading.length+'</b> 本正在讀':'')+'</div>';
+  /* 正在讀的排前面，編號接著往下走，不要兩段都從 01 開始 */
   if(reading.length) h+='<ul class="lv__list">'+reading.map((b,i)=>row(b,i+1)).join('')+'</ul>';
-  h+='<ul class="lv__list">'+shelf.map((b,i)=>row(b,i+1)).join('')+'</ul>';
+  h+='<ul class="lv__list">'+shelf.map((b,i)=>row(b,reading.length+i+1)).join('')+'</ul>';
   $("lvInner").innerHTML=h;
 }
 function openList(){buildList(CATS.find(c=>c.key===openKey)); listview.classList.add("is-on"); $("lvClose").hidden=false;}
@@ -1552,7 +1570,11 @@ function wireDeep(){
    完全不呼叫 AI：卡片與「你會怎麼想到它」的說法都在建置時就寫好了，
    查詢只是本地的字串比對。離線可用、零延遲、不外送任何東西。 */
 const qk=$("qk"), qkInner=$("qkInner"), QKC="#8B857A";
-let QK=null, qkQuery="", qkTopic="", qkShow=8;
+let QK=null, qkQuery="", qkTopic="", qkShow=8, qkWeak=false, qkWeakN=0, qkForce=false;
+/* 誠實門檻（2026-10-19 實測）：好查詢第一名 ≥ 20 分、只留 4–7 張；
+   「朋友失戀了」第一名 27 但 63 張打平、「房貸利率」第一名 2.3 且 223 張打平——
+   分數全來自「不知道」「什麼」這種通用字，書裡根本沒有那件事。 */
+const QK_MIN_TOP=15, QK_MAX_KEEP=24;
 
 // 中文沒有空白分詞，用二元組比對；「不知道」「什麼」這種到處都有的詞要靠 IDF 壓下去
 function qkGrams(s){
@@ -1578,7 +1600,7 @@ function qkSearch(q){
   if(!q.trim()) return pool.map(d=>d.c);
   const gs=[...new Set(qkGrams(q))];
   if(!gs.length) return pool.map(d=>d.c);
-  return pool.map(d=>{
+  const scored=pool.map(d=>{
     let s=0;
     gs.forEach(g=>{
       const w=QK.idf(g);
@@ -1590,8 +1612,13 @@ function qkSearch(q){
   }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s)
     // 分數 >0 幾乎全中（隨便一個字都有人用），只留跟第一名同一個量級的，
     // 否則「找到 303 張」這個數字是在騙人
-    .filter((x,_,arr)=>x.s>=arr[0].s*0.45)
-    .slice(0,40).map(x=>x.c);
+    .filter((x,_,arr)=>x.s>=arr[0].s*0.45);
+  /* 第一名太低、或幾十張打平，都代表書裡沒有這個場面。
+     與其塞一張字面沾邊的卡，不如直說沒有；他硬要看才給。 */
+  qkWeak=!scored.length||scored[0].s<QK_MIN_TOP||scored.length>QK_MAX_KEEP;
+  qkWeakN=scored.length;
+  if(qkWeak&&!qkForce) return [];
+  return scored.slice(0,40).map(x=>x.c);
 }
 const MYKEY=id=>"shelf.my."+id;
 function qkCardHTML(c){
@@ -1628,8 +1655,10 @@ function qkRender(){
     +'<div class="qk__chips" id="qkChips">'
     +'<button type="button" data-topic=""'+(qkTopic?'':' class="is-on"')+'>全部</button>'+chips
     +'</div></div>';
-  h+='<p class="qk__count">'+res.length+' 張卡'
+  if(res.length) h+='<p class="qk__count">'+res.length+' 張卡'
     +(qkTopic?'　·　'+esc(qkTopic):'')+(qkQuery.trim()?'　·　依相關度排序':'')+'</p>';
+  if(res.length&&qkWeak&&qkForce) h+='<p class="qk__none" style="margin-top:.6em">'
+    +'這些只是字面沾邊，書裡沒有真的講到這個場面。</p>';
   /* 搜了卻沒東西的字，記在本機。那份清單就是「書櫃還缺什麼」的需求清單，
      比我猜下一本該拍哪本書準得多。只留最近 60 筆，不上傳。 */
   if(!res.length&&qkQuery.trim()&&!qkTopic){
@@ -1646,11 +1675,14 @@ function qkRender(){
     const all=qkTopic?(()=>{const t=qkTopic;qkTopic="";const n=qkSearch(qkQuery).length;qkTopic=t;return n;})():0;
     h+='<p class="qk__none">';
     if(qkTopic&&all) h+='「'+esc(qkTopic)+'」裡沒有，但其他主題有 '+all+' 張。';
+    else if(qkQuery.trim()) h+='這 '+DEEPS.length+' 本書裡沒有這個場面。'
+      +'上面的主題是目前涵蓋得到的範圍，點一個看看，或換個說法。';
     else h+='這裡沒有。換個說法試試，或先看看上面的主題——'
       +'書櫃裡目前只有 '+DEEPS.length+' 本深讀筆記，涵蓋得到的情境有限。';
     h+='</p>';
     // 取消篩選之後還是 0 筆的話，這顆按鈕按了也是白按，不要給
     if(qkTopic&&all) h+='<button class="qk__more" type="button" data-topic="">搜尋全部主題（'+all+' 張）</button>';
+    else if(qkWeak&&qkWeakN) h+='<button class="qk__more" type="button" id="qkForce">硬要看的話，有 '+qkWeakN+' 張字面沾邊</button>';
   }
   if(!qkQuery.trim()&&!qkTopic){
     let miss=[]; try{ miss=JSON.parse(localStorage.getItem("shelf.miss")||"[]"); }catch(_){}
@@ -1699,7 +1731,7 @@ let qkTick=null, qkComposing=false;
 function qkType(el){
   clearTimeout(qkTick);
   qkTick=setTimeout(()=>{
-    qkQuery=el.value; qkShow=8;
+    qkQuery=el.value; qkShow=8; qkForce=false;
     const pos=el.selectionStart;
     qkRender();
     const n=$("qkIn"); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){} }
@@ -1729,10 +1761,11 @@ qk.addEventListener("input",e=>{
 });
 qk.addEventListener("click",e=>{
   const chip=e.target.closest("[data-topic]");
-  if(chip){ qkTopic=chip.dataset.topic; qkShow=8; qkRender(); qk.scrollTop=0; return; }
+  if(chip){ qkTopic=chip.dataset.topic; qkShow=8; qkForce=false; qkRender(); qk.scrollTop=0; return; }
   if(e.target.id==="qkMore"){ qkShow+=12; qkRender(); return; }
+  if(e.target.id==="qkForce"){ qkForce=true; qkShow=8; qkRender(); return; }
   const miss=e.target.closest("[data-miss]");
-  if(miss){ qkQuery=miss.dataset.miss; qkShow=8; qkRender();
+  if(miss){ qkQuery=miss.dataset.miss; qkShow=8; qkForce=false; qkRender();
     const el=$("qkIn"); if(el) el.value=qkQuery; return; }
   const src=e.target.closest("[data-open-deep]");
   if(src){ e.preventDefault(); openDeep(src.dataset.openDeep, src.dataset.ch); }
