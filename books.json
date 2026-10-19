@@ -39,7 +39,7 @@
   },
   {
    "key": "misc",
-   "name": "其他・待指認",
+   "name": "其他",
    "color": "#43423E",
    "rep": "讀不清的、教科書、族譜",
    "hidden": true
@@ -5082,7 +5082,7 @@
   },
   {
    "id": "misc-119",
-   "t": "史蒂芬·柯瑞 GOLDEN（運動傳記，分類待你決定）",
+   "t": "史蒂芬·柯瑞 GOLDEN",
    "a": "Marcus Thompson II",
    "c": "misc",
    "ly": 3,

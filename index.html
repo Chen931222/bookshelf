@@ -3,7 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>書櫃</title>
+<title>書櫃 · 一個人的實體書櫃</title>
+<meta name="description" content="一個人的實體書櫃線上目錄：120 冊，大綱是查來的，評語是自己寫的。附深讀筆記、臨場速查情境卡，還能問書櫃一個橫跨好幾本書的問題。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="書櫃 · 一個人的實體書櫃">
+<meta property="og:description" content="120 冊，大綱是查來的，評語是自己寫的。深讀筆記、臨場速查、問書櫃。">
+<meta property="og:url" content="https://bookshelf-nine-gamma.vercel.app/">
+<meta property="og:image" content="https://bookshelf-nine-gamma.vercel.app/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23141310'/%3E%3Crect x='8.5' y='5' width='15' height='22' rx='1.2' fill='%23F2ECE0'/%3E%3Crect x='8.5' y='5' width='3.4' height='22' fill='%23C08A4E'/%3E%3Cline x1='15' y1='9' x2='20.5' y2='9' stroke='%23141310' stroke-width='1.1'/%3E%3Cline x1='15' y1='12' x2='20.5' y2='12' stroke='%23141310' stroke-width='1.1'/%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#141310">
@@ -776,7 +786,7 @@ if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
     <h1 class="guest__h">留言 · 推薦一本書</h1>
     <p class="guest__sub">看完這座書櫃，留下你的一句話，或推薦一本你覺得該進來的書。不用登入，寫個暱稱就好。</p>
     <div id="waline"></div>
-    <div class="guest__wait" id="guestWait" hidden>留言功能設定中，很快開放。<br>（後端已部署，等資料庫接上就會亮起來。）</div>
+    <div class="guest__wait" id="guestWait" hidden>留言系統載入中⋯</div>
   </div>
 </section>
 <button class="cat__close" id="guestClose" hidden style="z-index:71">Close</button>
@@ -826,7 +836,8 @@ const DATA = await fetch('books.json', {cache:'no-cache'}).then(r => {
 const CATS = DATA.categories;
 
 /* t=書名 a=作者 c=類別 ly=層 o=擺法 r=正在讀 rv=待核對 cover=封面檔(暫無) */
-const BOOKS = DATA.books;
+/* 書名以「待指認」開頭的是主人的待辦（還沒認出是哪本），資料留著、網站不顯示 */
+const BOOKS = DATA.books.filter(b=>!/^待指認/.test(b.t||""));
 
 const RESEARCH = {}; BOOKS.forEach((b,i)=>{ if(b.res) RESEARCH[i]=b.res; });
 BOOKS.forEach((b,i)=>{if(RESEARCH[i])b.res=RESEARCH[i];});
@@ -965,7 +976,7 @@ function seed(i){const a=Math.sin((i+1)*12.9898)*43758.5453, b=Math.sin((i+1)*78
 
 function coverInner(b,accent){
   return b.cover
-    ? '<img src="'+esc(b.cover)+'" alt="">'
+    ? '<img src="'+esc(b.cover)+'" alt="" loading="lazy" decoding="async">'
     : '<span class="cover__dot" style="--accent:'+accent+'"></span>'
       +'<span class="cover__t">'+esc(clean(b.t))+'</span>'
       +'<span class="cover__a">'+esc(b.a||'')+'</span>';
@@ -1134,7 +1145,7 @@ function openFocus(i){
   panel.innerHTML=
     '<p class="panel__kicker">'+esc(CATS.find(c=>c.key===b.c).name)+'</p>'
     +'<h2 class="panel__t">'+esc(b.t.replace(/（.*?）/g,''))+'</h2>'
-    +'<p class="panel__a">'+esc(b.a||'作者待補')+'</p>'
+    +'<p class="panel__a">'+esc(b.a||'作者未記')+'</p>'
     +'<div class="panel__meta">'
     +(b.pub?'出版　<b>'+esc(b.pub)+(b.yr?'　'+b.yr:'')+'</b><br>':'')
     +'在書櫃　<b>'+lyLabel(b.ly)+'</b><br>'
@@ -1256,21 +1267,28 @@ const guest=$("guest");
 let walineLoaded=false;
 async function initWaline(){
   if(walineLoaded) return;
-  // 健康檢查：後端 + 資料庫都就緒才掛載，否則顯示「設定中」
+  /* 後端冷啟動＋CDN 載入實測要 5–9 秒，這段時間不能一片黑：先說載入中，
+     健康檢查或 CDN 失敗就換成「打不開」，不要讓人對著標題乾等 */
+  const wait=$("guestWait");
+  wait.textContent="留言系統載入中⋯"; wait.hidden=false; $("waline").style.display="none";
+  const fail=()=>{ wait.textContent="留言暫時打不開，等一下再試。"; wait.hidden=false; $("waline").style.display="none"; };
   let ok=false;
   try{
     const r=await fetch(GUEST_SERVER+"/api/comment?path=%2F&type=count",{headers:{Accept:"application/json"}});
     ok = r.ok && (r.headers.get("content-type")||"").includes("json");
   }catch(e){ ok=false; }
-  if(!ok){ $("guestWait").hidden=false; $("waline").style.display="none"; return; }
-  $("guestWait").hidden=true; $("waline").style.display="";
-  const mod=await import("https://unpkg.com/@waline/client@v3/dist/waline.js");
-  const css=document.createElement("link"); css.rel="stylesheet";
-  css.href="https://unpkg.com/@waline/client@v3/dist/waline.css"; document.head.appendChild(css);
-  mod.init({ el:"#waline", serverURL:GUEST_SERVER, path:"/", lang:"zh-TW",
-    login:"disable", reaction:false, emoji:false, dark:true,
-    locale:{ placeholder:"寫下你的留言或推薦…（暱稱必填，Email 可留可不留）" } });
-  walineLoaded=true;
+  if(!ok){ fail(); return; }
+  try{
+    const mod=await import("https://unpkg.com/@waline/client@v3/dist/waline.js");
+    const css=document.createElement("link"); css.rel="stylesheet";
+    css.href="https://unpkg.com/@waline/client@v3/dist/waline.css"; document.head.appendChild(css);
+    $("waline").style.display="";
+    mod.init({ el:"#waline", serverURL:GUEST_SERVER, path:"/", lang:"zh-TW",
+      login:"disable", reaction:false, emoji:false, dark:true,
+      locale:{ placeholder:"寫下你的留言或推薦…（暱稱必填，Email 可留可不留）" } });
+    wait.hidden=true;
+    walineLoaded=true;
+  }catch(e){ fail(); }
 }
 function openGuest(){ guest.classList.add("is-on"); $("guestClose").hidden=false; initWaline(); }
 function closeGuest(){ guest.classList.remove("is-on"); $("guestClose").hidden=true; }
@@ -1412,7 +1430,7 @@ function deepHTML(d,cover){
 
   let h='<div class="deep__inner">'
     +'<header class="deep__head">'
-    +'<div class="deep__cover">'+(cover?'<img src="'+esc(cover)+'" alt="">':'')+'</div>'
+    +'<div class="deep__cover">'+(cover?'<img src="'+esc(cover)+'" alt="" loading="lazy" decoding="async">':'')+'</div>'
     +'<div>'
     +'<p class="deep__kicker">深讀筆記</p>'
     +'<h1 class="deep__h">'+esc(d.title)+'</h1>'
@@ -1779,7 +1797,7 @@ function dxHTML(metas){
   DEEPS.forEach((b,i)=>{
     const m=metas&&metas[i];
     h+='<li><a class="dx__item" href="#" data-deep="'+esc(b.id)+'">'
-      +'<div class="dx__cover">'+(b.cover?'<img src="'+esc(b.cover)+'" alt="">':'')+'</div>'
+      +'<div class="dx__cover">'+(b.cover?'<img src="'+esc(b.cover)+'" alt="" loading="lazy" decoding="async">':'')+'</div>'
       +'<div><div class="dx__t">'+esc(clean(b.t))+'</div>'
       +'<div class="dx__a">'+esc(b.a||'')+(b.pub?'　·　'+esc(b.pub):'')+'</div>'
       +(m?'<div class="dx__specs"><span>'+esc(m.span)+'</span>'
